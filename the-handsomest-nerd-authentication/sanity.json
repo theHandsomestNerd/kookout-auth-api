@@ -1,0 +1,57 @@
+{
+  "root": true,
+  "api": {
+    "projectId": "dhhk6mar",
+    "dataset": "production"
+  },
+  "project": {
+    "name": "the-handsomest-nerd-authentication"
+  },
+  "plugins": [
+    "@sanity/base",
+    "@sanity/default-layout",
+    "@sanity/default-login",
+    "@sanity/desk-tool",
+    "media"
+  ],
+  "__experimental_spaces": [
+    {
+      "name": "production",
+      "title": "Production",
+      "api": {
+        "projectId": "dhhk6mar",
+        "dataset": "production"
+      }
+    },
+    {
+      "name": "development",
+      "title": "Development",
+      "default": true,
+      "api": {
+        "projectId": "dhhk6mar",
+        "dataset": "development"
+      }
+    }
+  ],
+  "env": {
+    "development": {
+      "plugins": [
+        "@sanity/vision"
+      ]
+    }
+  },
+  "parts": [
+    {
+      "name": "part:@sanity/base/schema",
+      "path": "./schemas/schema"
+    },
+    {
+      "implements": "part:@sanity/form-builder/input/image/asset-sources",
+      "path": "./parts/assetSources.js"
+    },
+    {
+      "implements": "part:@sanity/form-builder/input/file/asset-sources",
+      "path": "./parts/assetSources.js"
+    }
+  ]
+}
