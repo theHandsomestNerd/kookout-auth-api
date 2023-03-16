@@ -1,6 +1,36 @@
-type SanityUser ={
+export type SanityUser = {
     _id: string,
-    displayName:string,
-    email:string,
-    username:string
+    displayName: string,
+    email: string,
+    username: string
+}
+
+export type SanityExtendedUserProfile = {
+    _id: string,
+    age: number,
+    weight: number,
+    height: { feet: number, inches: number },
+    gender: string,
+    shortBio: string,
+    longBio: string,
+    partnerStatus: string,
+    pronouns: string[],
+    hashtags: string[],
+    ethnicity: string,
+    userId: string,
+    iAm: string,
+    imInto: string,
+    imOpenTo: string,
+    whatIDo: string,
+    whatImLookingFor: string,
+    whatInterestsMe: string,
+    whereILive: string,
+    sexPreferences: string,
+    nsfwFriendly: boolean,
+    isTraveling: boolean,
+    hivStatus: string,
+    lastTested: Date,
+    facebook: string,
+    instagram: string,
+    twitter: string,
 }

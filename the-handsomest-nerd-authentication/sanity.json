@@ -46,6 +46,10 @@
       "path": "./schemas/schema"
     },
     {
+      "name": "part:@sanity/desk-tool/structure",
+      "path": "./parts/deskStructure.js"
+    },
+    {
       "implements": "part:@sanity/form-builder/input/image/asset-sources",
       "path": "./parts/assetSources.js"
     },

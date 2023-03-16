@@ -1,7 +1,8 @@
 import {ListUsersResult, UserInfo, UserRecord} from "firebase-admin/auth"
-import {auth} from "firebase-admin";
 import authClient from "./authClient";
 import cmsClient from "./cmsClient";
+import {DecodedIdToken} from "firebase-admin/lib/auth";
+import * as logClient from "./logClient";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const admin = require("firebase-admin")
@@ -90,12 +91,6 @@ const getUser = (firebaseUserId: string): Promise<UserRecord> => {
     })
 }
 
-async function whoami(rawToken: string): Promise<auth.DecodedIdToken> {
-  const identity = await authClient.verifyToken(rawToken);
-  return identity;
-}
-
-
 const changeDisplayName = (displayName: string, firebaseUid: string) => {
   return admin.auth().updateUser(firebaseUid, {
     displayName: displayName
@@ -153,4 +148,16 @@ const findProvider = (firebaseUser: any, providerName: string) => {
   });
 };
 
-export default { saveUserProfileImage, createUser, getUser, whoami, changeDisplayName, changeEmail, changeProfilePhotoURL, queryAllUsers, findProvider}
+const getUserFromAccessToken = async (accessToken: string): Promise<DecodedIdToken> => {
+  const LOG_COMPONENT = "get-user-id-from-access-token"
+
+  const processedToken = accessToken.replace("Bearer ", "")
+  const verifyTokenResponse: DecodedIdToken = await authClient.verifyToken(processedToken)
+
+  logClient.log(LOG_COMPONENT, "NOTICE",
+      "user verified? ", verifyTokenResponse)
+
+  return verifyTokenResponse
+}
+
+export default { saveUserProfileImage, createUser, getUser, getUserFromAccessToken, changeDisplayName, changeEmail, changeProfilePhotoURL, queryAllUsers, findProvider}
