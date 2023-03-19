@@ -7,8 +7,9 @@ import {Height} from "../types";
 const getExtendedProfile = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
     const LOG_COMPONENT = `fetch-ext-profile-for-user-${id}`
-    logClient.log(LOG_COMPONENT, "ERROR",
-        "Get Extended Profile Request", id)
+
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "Get Extended Profile Request", req.params)
     if (!id) {
         logClient.log(LOG_COMPONENT, "ERROR",
             "Error no user id in fetch ext profile req", id)
@@ -21,25 +22,26 @@ const getExtendedProfile = async (req: any, res: any) => {
         const whoami = await authService.getUserFromAccessToken(headers.authorization);
 
         if (!whoami.uid) {
-            res.status(400).json({error: "No valid user from this Access Token"})
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
+                "No valid user from this Access Token");
+            return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
             const extProfile = await cmsClient.fetchExtendedProfile(id);
 
             const response = extProfile[0] ? extProfile[0] : null
-            logClient.log("server-side", "NOTICE",
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "Ext Profile Resp:", response);
 
-            res.status(200).send({extendedProfile: response});
+            return res.status(200).send({extendedProfile: response});
         }
     }
-
-
 }
 
 
 const getAllProfiles = async (req: any, res: any) => {
-    logClient.log("server-side", "NOTICE",
-        "Getting All Profiles", req.params);
+    const LOG_COMPONENT = 'get-all-profiles';
+    logClient.log(LOG_COMPONENT, "DEBUG",
+        "Getting All Profiles");
 
     const headers = req.headers;
 
@@ -51,7 +53,7 @@ const getAllProfiles = async (req: any, res: any) => {
         } else {
             const allUsers = await cmsClient.fetchAllUsers();
 
-            logClient.log("server-side", "NOTICE",
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "GET all profiles RESULTS", allUsers);
 
             return res.send({profiles: [...allUsers]});
@@ -81,7 +83,7 @@ const getProfileById = async (req: any, res: any) => {
             return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
             const aProfile = await cmsClient.fetchUser(id);
-            logClient.log("server-side", "NOTICE",
+            logClient.log(LOG_COMPONENT, "NOTICE",
                 "GET USER by id RESULT", aProfile);
             return res.send({appProfile: aProfile});
         }
@@ -464,7 +466,7 @@ const getProfileComments = async (req: any, res: any) => {
     }
 }
 
-const  commentProfile = async (req: any, res: any) => {
+const commentProfile = async (req: any, res: any) => {
 
     const headers = req.headers;
 

@@ -8,27 +8,20 @@ import * as os from "os";
 import * as fs from "fs";
 
 
-const registerAppUser = async (req:any, res:any) => {
-    logClient.log("server-side", "NOTICE",
+const registerAppUser = async (req: any, res: any) => {
+    const LOG_COMPONENT = "register-app-user";
+    logClient.log(LOG_COMPONENT, "NOTICE",
         "Registering a new user");
 
     const headers = req.headers;
 
-    logClient.log("server-side", "NOTICE",
-        "Authorization Headers", headers);
-
-
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
-
-        // logClient.log("server-side", "DEBUG",
-        //     "I am the user ", whoami);
-
-
-        // if (whoami) {
-        //     const allUsers = await authService.queryAllUsers();
-        logClient.log("server-side", "NOTICE",
-            "Register user results", whoami);
+        if (!whoami.uid) {
+            logClient.log(LOG_COMPONENT, "ERROR",
+                "Registering a new user token bad!");
+            // return res.status(400).json({error: "No valid user from this Access Token"})
+        }
 
         const firebaseUser = await authService.getUser(whoami.uid);
         if (!firebaseUser.uid) {
@@ -37,11 +30,9 @@ const registerAppUser = async (req:any, res:any) => {
 
         // create datastore representation of user
         const provider = PasswordAuthUtils.findProvider(firebaseUser);
-        // logClient.log("server-side", "NOTICE",
-        //     "provider", {provider, firebaseUser});
         const newAppUser = await cmsClient.createUser(whoami.email ?? "", whoami.uid, provider)
-        logClient.log("server-side", "NOTICE",
-            "created a Sanity User", {newAppUser});
+        logClient.log(LOG_COMPONENT, "NOTICE",
+            "Created a SanityUser", {newAppUser});
 
         res.status(200).json({profile: newAppUser});
     }
@@ -52,15 +43,15 @@ const registerAppUser = async (req:any, res:any) => {
 const updateUserProfile = async (req: any, functionRes: any) => {
     const LOG_COMPONENT = "update-profile-info"
     logClient.log(LOG_COMPONENT, "NOTICE",
-        "request to edit profile info for a user ")
-    // console.log("authorization:", req.headers.authorization)
+        "request to edit profile info for a user")
 
     // use token to get firebaseUser and uid
     const user = await authService.getUserFromAccessToken(req.headers.authorization)
     if (!user.uid) {
+        logClient.log(LOG_COMPONENT, "ERROR",
+            "No valid user from this Access Token")
         return functionRes.status(400).json({error: "No valid user from this Access Token"})
     }
-    console.log("user found", user, user.uid);
 
     // TODO: BLOG ABOUT WTF this SHAT is doing
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -74,8 +65,12 @@ const updateUserProfile = async (req: any, functionRes: any) => {
 
     busboy.on("file", (fieldname: any, file: any, info: any) => {
         const {filename, encoding, mimeType} = info
-        console.log("processing file from req:", info)
-        console.log(fieldname, file, filename, encoding, mimeType)
+
+        logClient.log(LOG_COMPONENT, "INFO",
+            "processing file from req:");
+
+        logClient.log(LOG_COMPONENT, "INFO",
+            "Data from image file", {fieldname, file, filename, encoding, mimeType});
 
         // if (mimeType !== "image/jpeg" && mimeType !== "image/png") {
         //     return functionRes.status(400).json({error: "Wrong file type submitted"})
@@ -95,9 +90,11 @@ const updateUserProfile = async (req: any, functionRes: any) => {
     })
 
     busboy.on("finish", async () => {
-        console.log("image complete uploaded")
+
         const {displayName, email} = otherFormData
 
+        logClient.log(LOG_COMPONENT, "INFO",
+            "image complete uploaded...processing other data",{displayName, email})
 
         let displayResp, emailResp, imageResp, appResp
         if (displayName) {
@@ -112,9 +109,7 @@ const updateUserProfile = async (req: any, functionRes: any) => {
             const imageAsset = await authService.saveUserProfileImage(imageToBeUploaded, user.uid)
 
             const imageUrl = imageAsset.url
-            // console.log("sanity image url ", imageUrl)
             imageResp = await authService.changeProfilePhotoURL(imageUrl, user.uid)
-            // console.log("firebase image url ", imageResp.photoUrl)
         }
 
         const allChanges = {
@@ -123,10 +118,10 @@ const updateUserProfile = async (req: any, functionRes: any) => {
             photoURL: imageResp?.photoURL
         }
 
-        logClient.log(LOG_COMPONENT, "NOTICE",
-            "sanity update status", {appResp})
-        logClient.log(LOG_COMPONENT, "NOTICE",
-            "all profile changes this session", {allChanges})
+        logClient.log(LOG_COMPONENT, "DEBUG",
+            "sanity update status ", {appResp})
+        logClient.log(LOG_COMPONENT, "INFO",
+            "all profile changes this session ", {allChanges})
 
         functionRes.send({
             allChanges
@@ -135,15 +130,17 @@ const updateUserProfile = async (req: any, functionRes: any) => {
     })
 
     busboy.on("field", (name: any, val: any, info: any) => {
-        console.log(`Field [${name}]: value: %j`, val)
+        logClient.log("get-auth-user", "DEBUG",
+            `Field [${name}]: value: %j`, val);
         otherFormData[name] = val
     })
 
     busboy.end(req.rawBody)
 }
 
-const getAuthUser = async (req:any, res:any) => {
-    logClient.log("server-side", "NOTICE",
+const getAuthUser = async (req: any, res: any) => {
+    const LOG_COMPONENT = "get-auth-user";
+    logClient.log(LOG_COMPONENT, "INFO",
         "Getting my auth user Profile");
 
     const headers = req.headers;
@@ -152,9 +149,10 @@ const getAuthUser = async (req:any, res:any) => {
         const whoami = await authService.getUserFromAccessToken(headers.authorization);
 
         if (!whoami.uid) {
+            logClient.log(LOG_COMPONENT, "ERROR",
+                "No valid user from this Access Token");
             return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-
             return res.send({myAuthProfile: whoami});
         }
     }

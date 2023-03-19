@@ -150,12 +150,19 @@ const findProvider = (firebaseUser: any, providerName: string) => {
 
 const getUserFromAccessToken = async (accessToken: string): Promise<DecodedIdToken> => {
   const LOG_COMPONENT = "get-user-id-from-access-token"
+  logClient.log(LOG_COMPONENT, "INFO",
+      "authenticating user...")
 
   const processedToken = accessToken.replace("Bearer ", "")
   const verifyTokenResponse: DecodedIdToken = await authClient.verifyToken(processedToken)
 
   logClient.log(LOG_COMPONENT, "INFO",
-      "user verified? ", verifyTokenResponse !== undefined)
+      "user authenticated? ", verifyTokenResponse !== undefined)
+
+  if(verifyTokenResponse === undefined){
+    logClient.log(LOG_COMPONENT, "ERROR",
+        "No valid user found");
+  }
 
   return verifyTokenResponse
 }

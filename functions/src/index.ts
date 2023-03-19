@@ -35,7 +35,6 @@ app.get("/health-endpoint", (req, res, next) => {
         "Hello from the Server Siiiiiide", req.params);
 
     res.send({status: "200"});
-
 });
 
 app.post("/register-app-user", authController.registerAppUser);
