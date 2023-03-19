@@ -17,6 +17,21 @@ export default () =>
                 .title('Extended Profile')
                 .child(createSuperPane('ExtendedProfile', S)),
             S.listItem()
+                .title('Like')
+                .child(createSuperPane('Like', S)),
+            S.listItem()
+                .title('Follow')
+                .child(createSuperPane('Follow', S)),
+            S.listItem()
+                .title('Comment')
+                .child(createSuperPane('Comment', S)),
+            S.listItem()
+                .title('Category')
+                .child(createSuperPane('Category', S)),
+            S.listItem()
+                .title('Post')
+                .child(createSuperPane('Post', S)),
+            S.listItem()
                 .title('Media Tags')
                 .child(createSuperPane('media.tag', S))
         ]);

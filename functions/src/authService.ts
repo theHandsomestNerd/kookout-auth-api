@@ -154,8 +154,8 @@ const getUserFromAccessToken = async (accessToken: string): Promise<DecodedIdTok
   const processedToken = accessToken.replace("Bearer ", "")
   const verifyTokenResponse: DecodedIdToken = await authClient.verifyToken(processedToken)
 
-  logClient.log(LOG_COMPONENT, "NOTICE",
-      "user verified? ", verifyTokenResponse)
+  logClient.log(LOG_COMPONENT, "INFO",
+      "user verified? ", verifyTokenResponse !== undefined)
 
   return verifyTokenResponse
 }

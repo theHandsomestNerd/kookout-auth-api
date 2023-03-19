@@ -12,7 +12,8 @@
     "@sanity/default-layout",
     "@sanity/default-login",
     "@sanity/desk-tool",
-    "media"
+    "media",
+    "color-list"
   ],
   "__experimental_spaces": [
     {
@@ -36,7 +37,8 @@
   "env": {
     "development": {
       "plugins": [
-        "@sanity/vision"
+        "@sanity/vision",
+        "color-list"
       ]
     }
   },

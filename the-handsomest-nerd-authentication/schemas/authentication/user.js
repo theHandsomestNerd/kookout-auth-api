@@ -32,7 +32,9 @@ export default {
   ],
   preview: {
     select: {
-      title: 'email',
+      title: 'userId',
+      subtitle: 'email',
+      media: 'profileImage'
     },
   },
 };

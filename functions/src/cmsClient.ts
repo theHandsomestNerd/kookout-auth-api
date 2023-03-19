@@ -3,10 +3,13 @@ import sanityClient from "./sanityClient";
 import {v4 as uuidv4} from "uuid";
 import {createReadStream} from "fs";
 import {SanityImageAssetDocument} from "@sanity/client";
-import {SanityExtendedUserProfile, SanityUser} from "../types";
+import {SanityComment, SanityExtendedUserProfile, SanityFollow, SanityLike, SanityUser} from "../types";
 import groqQueries from "./groqQueries";
+import cmsUtils from "./cmsUtils";
 
 const createUser = async (email: string, userId: string, provider: any) => {
+    const LOG_COMPONENT = "create-user-"+userId
+
     const newSanityDocument = {
         _id: userId,
         _type: groqQueries.USER.type,
@@ -16,30 +19,88 @@ const createUser = async (email: string, userId: string, provider: any) => {
         loginProviders: [{...provider, _key: uuidv4()}]
     }
 
-    log("createUser", "NOTICE", "Creating User", newSanityDocument)
+    log(LOG_COMPONENT, "INFO", "Creating User", newSanityDocument)
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
-        console.log("createUser", "ERROR", "could not create user", {email, userId, provider, e})
+        log(LOG_COMPONENT, "ERROR", "could not create user", {email, userId, provider, e})
+        return e
+    })
+}
+
+enum LIKE_CATEGORY_ENUM {
+    PROFILE_LIKE='profile-like'
+}
+const createProfileLike = async (likerUserId: string, likeeUserId: string) => {
+    const LOG_COMPONENT = "create-profile-like-profile-"+likeeUserId+"-like-"+likeeUserId
+
+    const newSanityDocument = {
+        _type: groqQueries.LIKE.type,
+        liker: cmsUtils.getSanityDocumentRef(likerUserId),
+        likee: cmsUtils.getSanityDocumentRef(likeeUserId),
+        likeCategory: LIKE_CATEGORY_ENUM.PROFILE_LIKE
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Like", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create like", {likerUserId, likeeUserId, e})
+        return e
+    })
+}
+const createProfileFollow = async (followerUserId: string, followedUserId: string) => {
+    const LOG_COMPONENT = "create-profile-like-profile-"+followedUserId+"-like-"+followedUserId
+
+    const newSanityDocument = {
+        _type: groqQueries.FOLLOW.type,
+        follower: cmsUtils.getSanityDocumentRef(followerUserId),
+        followed: cmsUtils.getSanityDocumentRef(followedUserId),
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Follow", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create follow", {followerUserId, followedUserId, e})
+        return e
+    })
+}
+const removeLike = async (likeId: string) => {
+    const LOG_COMPONENT = "remove-like-profile-"+likeId;
+
+    log(LOG_COMPONENT, "INFO", "Removing Like", likeId)
+
+    return sanityClient.delete(likeId).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not delete like", {likeId, e})
+        return e
+    })
+}
+const removeFollow = async (followId: string) => {
+    const LOG_COMPONENT = "remove-follow-profile-"+followId;
+
+    log(LOG_COMPONENT, "INFO", "Removing Follow", followId)
+
+    return sanityClient.delete(followId).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not delete follow", {followId, e})
         return e
     })
 }
 
 const createReplaceExtendedProfile = async (userId: String, newProfile: SanityExtendedUserProfile) => {
+    const LOG_COMPONENT = "create-replace-ext-profile-"+userId
     const newSanityDocument = {
         ...newProfile,
         _type: groqQueries.EXT_PROFILE.type,
     }
 
-    log("createreplaceExtProfile", "NOTICE", "Creating Extended Profile for " + userId, newSanityDocument)
+    log(LOG_COMPONENT, "INFO", "Creating an Extended Profile for " + userId, newSanityDocument)
 
-    return sanityClient.createOrReplace(newSanityDocument).catch((e: any) => {
-        console.log("createUser", "ERROR", "could not create or replace ext profile", {userId})
+    return sanityClient.createOrReplace(newSanityDocument,{returnDocuments:true}).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create or replace ext profile", {userId})
         return e
     })
 }
 
 const fetchUser = (userId: string): Promise<SanityUser | undefined> => {
-    const LOG = "fetch-user"
+    const LOG = "fetch-user"+userId
 
     return sanityClient
         .fetch(
@@ -48,7 +109,7 @@ const fetchUser = (userId: string): Promise<SanityUser | undefined> => {
        }`,
             {userId, thisType: groqQueries.USER.type}
         ).then((data: SanityUser[]) => {
-            log(LOG, "NOTICE", "THe users raw", data)
+            log(LOG, "NOTICE", "The user raw", data)
 
             if (!data[0]) {
                 console.log(Error(`Error retrieving user no user returned for ${userId}: `))
@@ -59,6 +120,67 @@ const fetchUser = (userId: string): Promise<SanityUser | undefined> => {
             const error = "Error retrieving User"
             log(LOG, "ERROR", error, {error: e})
             console.log(Error(`Error retrieving User Error: ${userId} - ` + e.toString()))
+            return Promise.resolve(undefined);
+        })
+}
+
+const fetchProfileLikes = (userId: string): Promise<SanityLike[] | undefined> => {
+    const LOG = "fetch-profile-likes-"+userId
+
+    return sanityClient
+        .fetch(
+            `*[_type == $thisType && likee._ref == $userId ]{
+          ${groqQueries.LIKE.members}
+       }`,
+            {userId, thisType: groqQueries.LIKE.type}
+        ).then((data: SanityLike[]) => {
+            log(LOG, "NOTICE", "The raw Like", data)
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving Likes"
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving User Likes: ${userId} - ` + e.toString()))
+            return Promise.resolve(undefined);
+        })
+}
+const fetchProfileFollows = (userId: string): Promise<SanityFollow[] | undefined> => {
+    const LOG = "fetch-profile-likes-"+userId
+
+    return sanityClient
+        .fetch(
+            `*[_type == $thisType && followed._ref == $userId ]{
+          ${groqQueries.FOLLOW.members}
+       }`,
+            {userId, thisType: groqQueries.FOLLOW.type}
+        ).then((data: SanityFollow[]) => {
+            log(LOG, "NOTICE", "The raw Follow", data)
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving Follows"
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving User Follows: ${userId} - ` + e.toString()))
+            return Promise.resolve(undefined);
+        })
+}
+const fetchProfileComments = (userId: string): Promise<SanityComment[] | undefined> => {
+    const LOG = "fetch-profile-comment-"+userId
+
+    return sanityClient
+        .fetch(
+            `*[_type == $thisType && recipient._ref == $userId ]| order(publishedAt asc){
+          ${groqQueries.COMMENT.members}
+       }`,
+            {userId, thisType: groqQueries.COMMENT.type}
+        ).then((data: SanityComment[]) => {
+            log(LOG, "NOTICE", "The raw Comments", data)
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving Comments"
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving Profile Comments: ${userId} - ` + e.toString()))
             return Promise.resolve(undefined);
         })
 }
@@ -119,7 +241,7 @@ const fetchAllUsers = (): Promise<SanityUser[]> => {
                 thisType: groqQueries.USER.type
             }
         ).then((data: SanityUser[]) => {
-            log(LOG, "NOTICE", "THe users raw", data)
+            // log(LOG, "NOTICE", "The users raw", data)
 
             if (!data) {
                 console.log(Error(`Error retrieving users: `))
@@ -129,7 +251,7 @@ const fetchAllUsers = (): Promise<SanityUser[]> => {
         }).catch((e: any) => {
             const error = "Error retrieving Users"
             log(LOG, "ERROR", error, {error: e})
-            console.log(Error(`Error retrieving Users Error: - ` + e.toString()))
+            // console.log(Error(`Error retrieving Users Error: - ` + e.toString()))
             return Promise.resolve([]);
         })
 }
@@ -144,13 +266,13 @@ const fetchExtendedProfile = (id: string): Promise<SanityExtendedUserProfile[]> 
           ${groqQueries.EXT_PROFILE.members}
        }`, {
                 extProfileId,
-                theType: groqQueries.EXT_PROFILE.members
+                theType: groqQueries.EXT_PROFILE.type
             }
         ).then((data: SanityExtendedUserProfile[]) => {
             log(LOG, "NOTICE", "THe ext profile raw", data)
 
             if (!data[0]) {
-                console.log(`No ext profile for user id: ${id}`)
+                log(LOG, "INFO",`No ext profile for user id: ${id}`)
             }
 
             return data
@@ -162,6 +284,24 @@ const fetchExtendedProfile = (id: string): Promise<SanityExtendedUserProfile[]> 
         })
 }
 
+const createProfileComment = async (commenterUserId: string, profileUserId: string, commentBody: string) => {
+    const LOG_COMPONENT = "create-profile-comment-profile-"+profileUserId+"-comment-by-"+commenterUserId
+
+    const newSanityDocument = {
+        _type: groqQueries.COMMENT.type,
+        author: cmsUtils.getSanityDocumentRef(commenterUserId),
+        recipient: cmsUtils.getSanityDocumentRef(profileUserId),
+        publishedAt: new Date(Date.now()),
+        body: commentBody
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Comment", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create comment", {commenterUserId, profileUserId, commentBody, e})
+        return e
+    })
+}
 export default {
     createReplaceExtendedProfile,
     fetchExtendedProfile,
@@ -169,5 +309,13 @@ export default {
     uploadUserProfileImage,
     changeDisplayName,
     fetchUser,
-    fetchAllUsers
+    fetchAllUsers,
+    createProfileLike,
+    fetchProfileLikes,
+    fetchProfileComments,
+    removeLike,
+    createProfileComment,
+    createProfileFollow,
+    removeFollow,
+    fetchProfileFollows
 };

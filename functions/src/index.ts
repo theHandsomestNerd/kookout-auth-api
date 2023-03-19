@@ -7,7 +7,7 @@ import authController from "./authController";
 
 const app = express();
 const corsOptionsDelegate = (req: any, callback: any) => {
-    logClient.log("CORS", "NOTICE", "checking allowlist", {origin: req.header("Origin")});
+    // logClient.log("CORS", "NOTICE", "checking allowlist", {origin: req.header("Origin")});
     // let corsOptions;
     // if (allowlist.indexOf(req.header("Origin")) !== -1) {
     //   logClient.log("CORS", LogLevels.NOTICE, "origin in allowlist", {origin: req.header("Origin"), allowlist});
@@ -47,5 +47,16 @@ app.get("/get-my-profile", chatController.getMyProfile);
 app.get("/get-ext-profile/:id", chatController.getExtendedProfile);
 app.post("/update-create-ext-profile", chatController.updateCreateExtendedProfile);
 app.get("/get-all-profiles", chatController.getAllProfiles);
+
+app.post("/like-profile", chatController.likeProfile);
+app.post("/unlike-profile", chatController.unlikeProfile);
+app.get("/get-profile-likes/:id", chatController.getProfileLikes);
+
+app.post("/comment-profile", chatController.commentProfile);
+app.get("/get-profile-comments/:id", chatController.getProfileComments);
+
+app.post("/follow-profile", chatController.followProfile);
+app.post("/unfollow-profile", chatController.unfollowProfile);
+app.get("/get-profile-follows/:id", chatController.getProfileFollows);
 
 exports.app = functions.https.onRequest(app);

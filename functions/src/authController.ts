@@ -21,8 +21,8 @@ const registerAppUser = async (req:any, res:any) => {
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
 
-        logClient.log("server-side", "NOTICE",
-            "I am the user ", whoami);
+        // logClient.log("server-side", "DEBUG",
+        //     "I am the user ", whoami);
 
 
         // if (whoami) {
@@ -32,13 +32,13 @@ const registerAppUser = async (req:any, res:any) => {
 
         const firebaseUser = await authService.getUser(whoami.uid);
         if (!firebaseUser.uid) {
-            res.status(400).json({error: "No valid user from this Access Token"})
+            return res.status(400).json({error: "No valid user from this Access Token"})
         }
 
         // create datastore representation of user
         const provider = PasswordAuthUtils.findProvider(firebaseUser);
-        logClient.log("server-side", "NOTICE",
-            "provider", {provider, firebaseUser});
+        // logClient.log("server-side", "NOTICE",
+        //     "provider", {provider, firebaseUser});
         const newAppUser = await cmsClient.createUser(whoami.email ?? "", whoami.uid, provider)
         logClient.log("server-side", "NOTICE",
             "created a Sanity User", {newAppUser});
@@ -53,12 +53,12 @@ const updateUserProfile = async (req: any, functionRes: any) => {
     const LOG_COMPONENT = "update-profile-info"
     logClient.log(LOG_COMPONENT, "NOTICE",
         "request to edit profile info for a user ")
-    console.log("authorization:", req.headers.authorization)
+    // console.log("authorization:", req.headers.authorization)
 
     // use token to get firebaseUser and uid
     const user = await authService.getUserFromAccessToken(req.headers.authorization)
     if (!user.uid) {
-        functionRes.status(400).json({error: "No valid user from this Access Token"})
+        return functionRes.status(400).json({error: "No valid user from this Access Token"})
     }
     console.log("user found", user, user.uid);
 
@@ -112,9 +112,9 @@ const updateUserProfile = async (req: any, functionRes: any) => {
             const imageAsset = await authService.saveUserProfileImage(imageToBeUploaded, user.uid)
 
             const imageUrl = imageAsset.url
-            console.log("sanity image url ", imageUrl)
+            // console.log("sanity image url ", imageUrl)
             imageResp = await authService.changeProfilePhotoURL(imageUrl, user.uid)
-            console.log("firebase image url ", imageResp.photoUrl)
+            // console.log("firebase image url ", imageResp.photoUrl)
         }
 
         const allChanges = {
@@ -144,29 +144,20 @@ const updateUserProfile = async (req: any, functionRes: any) => {
 
 const getAuthUser = async (req:any, res:any) => {
     logClient.log("server-side", "NOTICE",
-        "Getting my auth user Profile", req.params);
+        "Getting my auth user Profile");
 
     const headers = req.headers;
-
-    logClient.log("server-side", "NOTICE",
-        "Authorization Headers", headers);
-
 
     if (headers.authorization) {
         const whoami = await authService.getUserFromAccessToken(headers.authorization);
 
-        logClient.log("server-side", "NOTICE",
-            "I am the user ", whoami);
-
         if (!whoami.uid) {
-            res.status(400).json({error: "No valid user from this Access Token"})
+            return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
 
-            res.send({myAuthProfile: whoami});
+            return res.send({myAuthProfile: whoami});
         }
     }
-
-
 }
 
 export default {registerAppUser, updateUserProfile, getAuthUser}

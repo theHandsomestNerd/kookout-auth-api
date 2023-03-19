@@ -20,7 +20,7 @@ const EXT_PROFILE = {
           whatImLookingFor,
           whatInterestsMe,
           whereILive,
-          sexPreference,
+          sexPreferences,
           nsfwFriendly,
           isTraveling,
           hivStatus,
@@ -47,4 +47,32 @@ const USER = {
     type: "user"
 }
 
-export default {EXT_PROFILE, USER}
+const LIKE = {
+    members: `
+          _id,
+          likee->,
+          liker->,
+          likeCategory,
+`,
+    type: "Like"
+}
+const FOLLOW = {
+    members: `
+          _id,
+          follower->,
+          followed->
+`,
+    type: "Follow"
+}
+const COMMENT = {
+    members: `
+          _id,
+          author->,
+          recipient->,
+          publishedAt,
+          body,
+`,
+    type: "Comment"
+}
+
+export default {EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW}

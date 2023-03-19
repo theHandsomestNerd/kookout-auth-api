@@ -1,3 +1,5 @@
+import {ImageAsset, Reference, Slug} from "@sanity/types";
+
 export type SanityUser = {
     _id: string,
     displayName: string,
@@ -5,11 +7,29 @@ export type SanityUser = {
     username: string
 }
 
+export type SanityLike = {
+    _id: string,
+    liker: Reference,
+    likee: Reference,
+    likeCategory: string
+}
+
+export type SanityFollow = {
+    _id: string,
+    follower: Reference,
+    followed: Reference,
+}
+
+export type Height = {
+    feet: number,
+    inches: number
+}
+
 export type SanityExtendedUserProfile = {
     _id: string,
     age: number,
     weight: number,
-    height: { feet: number, inches: number },
+    height: Height,
     gender: string,
     shortBio: string,
     longBio: string,
@@ -33,4 +53,31 @@ export type SanityExtendedUserProfile = {
     facebook: string,
     instagram: string,
     twitter: string,
+}
+
+
+export type SanityPost = {
+    _id: string,
+    slug: Slug,
+    author: SanityUser,
+
+    image: ImageAsset,
+    categories: SanityCategory[],
+    publishedAt: Date,
+    body: string,
+}
+export type SanityComment = {
+    _id: string,
+    author: SanityUser,
+    recipient: SanityUser,
+
+    publishedAt: Date,
+    body: string,
+}
+
+export type SanityCategory = {
+    _id: string,
+    title: string,
+    description: string,
+    color: { title: string, value: string }
 }
