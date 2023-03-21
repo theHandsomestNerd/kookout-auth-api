@@ -7,17 +7,47 @@ export type SanityUser = {
     username: string
 }
 
-export type SanityLike = {
+export type SanityLikeRef = {
     _id: string,
     liker: Reference,
     likee: Reference,
     likeCategory: string
 }
+export type SanityLike = {
+    _id: string,
+    liker: SanityUser,
+    likee: SanityUser,
+    likeCategory: string
+}
+export type SanityTimelineEvent = {
+    _id: string,
+    actor: SanityUser,
+    recipient: SanityUser,
+    action: string
+    isPublic:boolean
+    item: SanityLike | SanityUser | SanityComment | SanityFollow
+}
+export type SanityBlockRef = {
+    _id: string,
+    blocker: Reference,
+    blocked: Reference,
+}
+export type SanityBlock = {
+    _id: string,
+    blocker: SanityUser,
+    blocked: SanityUser,
+}
 
-export type SanityFollow = {
+export type SanityFollowRef = {
     _id: string,
     follower: Reference,
     followed: Reference,
+}
+
+export type SanityFollow = {
+    _id: string,
+    follower: SanityUser,
+    followed: SanityUser,
 }
 
 export type Height = {
@@ -58,10 +88,11 @@ export type SanityExtendedUserProfile = {
 
 export type SanityPost = {
     _id: string,
+    title: string,
     slug: Slug,
     author: SanityUser,
 
-    image: ImageAsset,
+    mainImage: ImageAsset,
     categories: SanityCategory[],
     publishedAt: Date,
     body: string,
@@ -70,6 +101,14 @@ export type SanityComment = {
     _id: string,
     author: SanityUser,
     recipient: SanityUser,
+
+    publishedAt: Date,
+    body: string,
+}
+export type SanityCommentRef = {
+    _id: string,
+    author: Reference,
+    recipient: Reference,
 
     publishedAt: Date,
     body: string,

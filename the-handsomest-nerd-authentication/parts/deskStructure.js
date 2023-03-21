@@ -17,8 +17,14 @@ export default () =>
                 .title('Extended Profile')
                 .child(createSuperPane('ExtendedProfile', S)),
             S.listItem()
+                .title('TimelineEvent')
+                .child(createSuperPane('TimelineEvent', S)),
+            S.listItem()
                 .title('Like')
                 .child(createSuperPane('Like', S)),
+            S.listItem()
+                .title('Block')
+                .child(createSuperPane('Block', S)),
             S.listItem()
                 .title('Follow')
                 .child(createSuperPane('Follow', S)),

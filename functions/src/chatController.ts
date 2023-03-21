@@ -3,6 +3,7 @@ import cmsClient from "./cmsClient";
 import authService from "./authService";
 import {DecodedIdToken} from "firebase-admin/lib/auth";
 import {Height} from "../types";
+import cmsService from "./cmsService";
 
 const getExtendedProfile = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -51,7 +52,7 @@ const getAllProfiles = async (req: any, res: any) => {
         if (!whoami.uid) {
             return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const allUsers = await cmsClient.fetchAllUsers();
+            const allUsers = await cmsService.fetchAllUsers(whoami.uid);
 
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "GET all profiles RESULTS", allUsers);
@@ -269,7 +270,7 @@ const likeProfile = async (req: any, res: any) => {
         logClient.log(LOG_COMPONENT, "NOTICE",
             "request to like profile by", whoami);
 
-        const likeStatus = await cmsClient.createProfileLike(whoami.uid, userId)
+        const likeStatus = await cmsService.createProfileLike(whoami.uid, userId)
         if (likeStatus._id) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "created a Sanity Like", {likeStatus: "SUCCESS"});
@@ -284,6 +285,38 @@ const likeProfile = async (req: any, res: any) => {
     }
 
     return res.status(401).json({likeStatus: "ERROR", body: "UNAUTHORIZED"});
+}
+
+const blockProfile = async (req: any, res: any) => {
+
+    const headers = req.headers;
+
+    const {userId} = req.body;
+    const LOG_COMPONENT = "block-profile-" + userId
+
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "request to block profile", userId);
+
+    if (headers.authorization) {
+        const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
+        logClient.log(LOG_COMPONENT, "NOTICE",
+            "request to block profile by", whoami);
+
+        const blockStatus = await cmsClient.createProfileBlock(whoami.uid, userId)
+        if (blockStatus._id) {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
+                "created a Sanity Block", {blockStatus: "SUCCESS"});
+
+            return res.status(200).json({blockStatus: "SUCCESS", body: blockStatus});
+        } else {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
+                "error creating block", {blockStatus: "ERROR", message: blockStatus});
+
+            return res.status(400).json({blockStatus: "ERROR", body: blockStatus});
+        }
+    }
+
+    return res.status(401).json({blockStatus: "ERROR", body: "UNAUTHORIZED"});
 }
 const followProfile = async (req: any, res: any) => {
 
@@ -300,7 +333,7 @@ const followProfile = async (req: any, res: any) => {
         logClient.log(LOG_COMPONENT, "NOTICE",
             "request to follow profile by", whoami);
 
-        const followStatus = await cmsClient.createProfileFollow(whoami.uid, userId)
+        const followStatus = await cmsService.createProfileFollow(whoami.uid, userId)
         if (followStatus._id) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "created a Sanity Follow", {followStatus: "SUCCESS"});
@@ -331,7 +364,7 @@ const unlikeProfile = async (req: any, res: any) => {
         logClient.log(LOG_COMPONENT, "NOTICE",
             "request to unlike profile by ", whoami);
 
-        const likeStatus = await cmsClient.removeLike(likeId);
+        const likeStatus = await cmsService.removeLike(likeId);
         if (likeStatus.transactionId) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "deleted a Sanity Like", {unlikeStatus: "SUCCESS"});
@@ -346,6 +379,37 @@ const unlikeProfile = async (req: any, res: any) => {
     }
 
     return res.status(401).json({likeStatus: "ERROR", body: "UNAUTHORIZED"});
+}
+const unblockProfile = async (req: any, res: any) => {
+
+    const headers = req.headers;
+
+    const {blockId} = req.body;
+    const LOG_COMPONENT = "unblock-profile-blockid-" + blockId
+
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "request to unblock profile ", blockId);
+
+    if (headers.authorization) {
+        const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
+        logClient.log(LOG_COMPONENT, "NOTICE",
+            "request to unblock profile by ", whoami);
+
+        const blockStatus = await cmsClient.removeBlock(blockId);
+        if (blockStatus.transactionId) {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
+                "deleted a Sanity Block", {unblockStatus: "SUCCESS"});
+
+            return res.status(200).json({unblockStatus: "SUCCESS", body: blockStatus});
+        } else {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
+                "error creating block", {unblockStatus: "ERROR", message: blockStatus});
+
+            return res.status(400).json({unblockStatus: "ERROR", body: blockStatus});
+        }
+    }
+
+    return res.status(401).json({blockStatus: "ERROR", body: "UNAUTHORIZED"});
 }
 
 const unfollowProfile = async (req: any, res: any) => {
@@ -406,6 +470,76 @@ const getProfileLikes = async (req: any, res: any) => {
                 "Profile Likes", profileLikes);
 
             res.status(200).send({profileLikes: profileLikes});
+        }
+    }
+}
+const getTimelineEvents = async (req: any, res: any) => {
+    const LOG_COMPONENT = `get-timeline-events`
+    logClient.log(LOG_COMPONENT, "ERROR",
+        "Get  Profile TimelineEvents Request")
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const profileTimelineEvents = await cmsService.fetchProfileTimelineEvents(whoami.uid);
+
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "Profile TimelineEvents", profileTimelineEvents);
+
+            res.status(200).send({profileTimelineEvents: profileTimelineEvents});
+        }
+    }
+}
+const getProfileBlocks = async (req: any, res: any) => {
+    const {id}: { id: string } = req.params
+    const LOG_COMPONENT = `get-profile-blocks-${id}`
+    logClient.log(LOG_COMPONENT, "ERROR",
+        "Get  Profile Blocks Request", id)
+    if (!id) {
+        logClient.log(LOG_COMPONENT, "ERROR",
+            "Error no user id in get profile block req", id)
+
+        return res.send({status: "404", message: "no id present in url for get profile block request"})
+    }
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const profileBlocks = await cmsClient.fetchProfileBlocks(id);
+
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "Profile Blocks", profileBlocks);
+
+            res.status(200).send({profileBlocks});
+        }
+    }
+}
+const getMyProfileBlocks = async (req: any, res: any) => {
+    const LOG_COMPONENT = `get-my-profile-blocks`
+    logClient.log(LOG_COMPONENT, "INFO",
+        "Get my Profile Blocks Request")
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const profileBlocks = await cmsClient.fetchMyProfileBlocks(whoami.uid);
+
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "My Profile Blocks", profileBlocks);
+
+            res.status(200).send({profileBlocks});
         }
     }
 }
@@ -481,7 +615,7 @@ const commentProfile = async (req: any, res: any) => {
         logClient.log(LOG_COMPONENT, "NOTICE",
             "request to comment profile by", whoami);
 
-        const commentStatus = await cmsClient.createProfileComment(whoami.uid, userId, commentBody);
+        const commentStatus = await cmsService.createProfileComment(whoami.uid, userId, commentBody);
         if (commentStatus._id) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "created a Sanity Comment", {commentStatus: "SUCCESS"});
@@ -504,11 +638,16 @@ export default {
     getAllProfiles,
     getProfileById,
     likeProfile,
+    blockProfile,
     getProfileLikes,
     unlikeProfile,
+    unblockProfile,
     commentProfile,
     getProfileComments,
     followProfile,
     unfollowProfile,
-    getProfileFollows
+    getProfileFollows,
+    getProfileBlocks,
+    getMyProfileBlocks,
+    getTimelineEvents
 }

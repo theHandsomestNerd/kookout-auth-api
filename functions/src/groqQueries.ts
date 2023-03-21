@@ -56,6 +56,14 @@ const LIKE = {
 `,
     type: "Like"
 }
+const BLOCK = {
+    members: `
+          _id,
+          blocker->,
+          blocked->,
+`,
+    type: "Block"
+}
 const FOLLOW = {
     members: `
           _id,
@@ -74,5 +82,16 @@ const COMMENT = {
 `,
     type: "Comment"
 }
+const TIMELINE_EVENT = {
+    members: `
+          _id,
+          isPublic,
+          actor->,
+          action,
+          recipient->,
+          item->,
+`,
+    type: "TimelineEvent"
+}
 
-export default {EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW}
+export default {EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW, BLOCK, TIMELINE_EVENT}
