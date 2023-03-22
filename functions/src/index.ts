@@ -22,6 +22,8 @@ const corsOptionsDelegate = (req: any, callback: any) => {
 };
 
 app.use(cors(corsOptionsDelegate));
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '100mb',parameterLimit: 100000, extended: false},));
 
 const Logger = function (req: any, res: any, next: any) {
     logClient.createLogger(req, res, next);
