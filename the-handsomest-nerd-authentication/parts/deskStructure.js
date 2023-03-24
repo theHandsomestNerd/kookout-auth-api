@@ -23,6 +23,12 @@ export default () =>
                 .title('Like')
                 .child(createSuperPane('Like', S)),
             S.listItem()
+                .title('PhotoAlbum')
+                .child(createSuperPane('PhotoAlbum', S)),
+            S.listItem()
+                .title('AlbumImage')
+                .child(createSuperPane('AlbumImage', S)),
+            S.listItem()
                 .title('Block')
                 .child(createSuperPane('Block', S)),
             S.listItem()

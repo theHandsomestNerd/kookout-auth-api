@@ -13,6 +13,8 @@ import Comment from "./comment";
 import Follow from "./follow";
 import TimelineEvent from "./timelineEvent";
 import Block from "./block";
+import PhotoAlbum from "./photoAlbum";
+import AlbumImage from "./albumImage";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -31,6 +33,8 @@ export default createSchema({
       TimelineEvent,
       Block,
       Post,
+      PhotoAlbum,
+      AlbumImage,
       firebaseTwitterProvider
   ]),
 })

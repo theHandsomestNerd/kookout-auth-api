@@ -19,6 +19,8 @@ export default {
   preview: {
     select: {
       title: 'followed._id',
+      media: 'followed.profileImage',
+      subtitle: 'follower._id'
     },
   },
 };

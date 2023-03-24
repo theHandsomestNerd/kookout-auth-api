@@ -4,9 +4,10 @@ import {v4 as uuidv4} from "uuid";
 import {createReadStream} from "fs";
 import {SanityImageAssetDocument} from "@sanity/client";
 import {
+    SanityBlock,
     SanityBlockRef,
     SanityComment,
-    SanityExtendedUserProfile,
+    SanityExtendedUserProfile, SanityExtendedUserProfileRef,
     SanityFollowRef,
     SanityLike,
     SanityLikeRef, SanityTimelineEvent,
@@ -23,7 +24,7 @@ const createUser = async (email: string, userId: string, provider: any) => {
         _type: groqQueries.USER.type,
         email: email,
         userId: userId,
-        displayName: provider.displayName || email,
+        displayName: provider.displayName || email.split('@')[0],
         loginProviders: [{...provider, _key: uuidv4()}]
     }
 
@@ -119,7 +120,7 @@ const removeFollow = async (followId: string) => {
     })
 }
 
-const createReplaceExtendedProfile = async (userId: String, newProfile: SanityExtendedUserProfile) => {
+const createReplaceExtendedProfile = async (userId: String, newProfile: SanityExtendedUserProfileRef) => {
     const LOG_COMPONENT = "create-replace-ext-profile-" + userId
     const newSanityDocument = {
         ...newProfile,
@@ -220,7 +221,7 @@ const fetchMyProfileBlocks = (userId: string): Promise<SanityBlockRef[] | undefi
         })
 }
 
-const fetchBiDirectionalProfileBlocks = (userId: string): Promise<SanityBlockRef[] | undefined> => {
+const fetchBiDirectionalProfileBlocks = (userId: string): Promise<SanityBlock[] | undefined> => {
     const LOG = "fetch-my-bidirectional-profile-blocks-" + userId
 
     return sanityClient
@@ -260,15 +261,29 @@ const fetchProfileFollows = (userId: string): Promise<SanityFollowRef[] | undefi
             return Promise.resolve(undefined);
         })
 }
-const fetchProfileComments = (userId: string): Promise<SanityComment[] | undefined> => {
+const fetchProfileComments = (userId: string, blockedIds?: string[]): Promise<SanityComment[] | undefined> => {
     const LOG = "fetch-profile-comment-" + userId
+
+    var queryString = "_type == $thisType && recipient._ref == $userId";
+    var queryParams: any = {
+        userId,
+        thisType: groqQueries.COMMENT.type,
+    }
+
+    if (blockedIds && blockedIds.length > 0) {
+        log(LOG, "NOTICE", "I have blocked these users", blockedIds)
+        queryParams = {...queryParams, blockedIds: blockedIds}
+        queryString += " && !(author._ref in $blockedIds) && !(recipient._ref in $blockedIds)"
+    }
+    log(LOG, "Notice", `All comments Query:`, {queryString, queryParams})
+
 
     return sanityClient
         .fetch(
-            `*[_type == $thisType && recipient._ref == $userId ]| order(publishedAt asc){
+            `*[${queryString}]| order(publishedAt asc){
           ${groqQueries.COMMENT.members}
        }`,
-            {userId, thisType: groqQueries.COMMENT.type}
+            queryParams
         ).then((data: SanityComment[]) => {
             log(LOG, "NOTICE", "The raw Comments", data)
 
@@ -337,8 +352,9 @@ const fetchAllUsers = (blockedIds?: string[]): Promise<SanityUser[]> => {
     if (blockedIds && blockedIds.length > 0) {
         log(LOG, "NOTICE", "I have blocked these users", blockedIds)
         queryParams = {...queryParams, blockedIds: blockedIds}
-        queryString += " && !(userId in [$blockedIds])"
+        queryString += " && !(userId in $blockedIds)"
     }
+    log(LOG, "Notice", `All users Query:`, {queryString, queryParams})
 
     return sanityClient
         .fetch(

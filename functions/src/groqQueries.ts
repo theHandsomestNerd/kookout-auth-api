@@ -3,6 +3,7 @@ const EXT_PROFILE = {
           _id,
           age,
           userId,
+          userRef->,
           weight,
           height,
           gender,

@@ -29,13 +29,9 @@ export default {
 
     preview: {
         select: {
-            title: 'recipient.displayName',
-            author: 'author.displayName',
-        },
-        prepare(selection) {
-            const {author} = selection;
-            console.log("selection", selection);
-            return {...selection, subtitle: author && `by ${author}`};
+            title: 'author.displayName',
+            media: 'author.profileImage',
+            subtitle: 'recipient._id'
         },
     },
 };

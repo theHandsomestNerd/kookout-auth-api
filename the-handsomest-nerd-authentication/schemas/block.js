@@ -19,6 +19,8 @@ export default {
   preview: {
     select: {
       title: 'blocked._id',
+      media: 'blocked.profileImage',
+      subtitle: 'blocker._id'
     },
   },
 };

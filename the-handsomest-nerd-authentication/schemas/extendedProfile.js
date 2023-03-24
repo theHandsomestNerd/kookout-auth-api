@@ -63,6 +63,12 @@ export default {
       type: 'string',
     },
     {
+      name: 'userRef',
+      title: 'User Ref',
+      type: 'reference',
+      to:[{type:'user'}]
+    },
+    {
       name: 'shortBio',
       title: 'Short Bio',
       type: 'text',
@@ -150,7 +156,8 @@ export default {
   ],
   preview: {
     select: {
-      title: 'userId',
+      title: 'userRef._id',
+      media: 'userRef.profileImage',
     },
   },
 };

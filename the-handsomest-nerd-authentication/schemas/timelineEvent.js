@@ -53,6 +53,8 @@ export default {
     preview: {
         select: {
             title: 'actor._id',
+            media: 'recipient.profileImage',
+            subtitle: 'action'
         },
     },
 };

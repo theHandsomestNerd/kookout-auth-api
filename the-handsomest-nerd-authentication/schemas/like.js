@@ -31,6 +31,8 @@ export default {
   preview: {
     select: {
       title: 'likee._id',
+      media: 'likee.profileImage',
+      subtitle: 'liker._id'
     },
   },
 };

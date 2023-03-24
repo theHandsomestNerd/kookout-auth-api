@@ -4,6 +4,7 @@ import authService from "./authService";
 import {DecodedIdToken} from "firebase-admin/lib/auth";
 import {Height} from "../types";
 import cmsService from "./cmsService";
+import cmsUtils from "./cmsUtils";
 
 const getExtendedProfile = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -145,6 +146,7 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
         var profileData = {
             _id: "ext-profile-" + whoami.uid,
             userId: whoami.uid,
+            userRef: cmsUtils.getSanityDocumentRef(whoami.uid),
         } as any
 
         if (shortBio) {
@@ -234,6 +236,7 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
                 gender: gender,
             }
         }
+
 
         if (height) {
             const intermediateHeight: Height = JSON.parse(height);
@@ -590,7 +593,7 @@ const getProfileComments = async (req: any, res: any) => {
         if (!whoami.uid) {
             res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const profileComments = await cmsClient.fetchProfileComments(id);
+            const profileComments = await cmsService.fetchProfileComments(id, whoami.uid);
 
             logClient.log(LOG_COMPONENT, "NOTICE",
                 "Profile Comments", profileComments);
