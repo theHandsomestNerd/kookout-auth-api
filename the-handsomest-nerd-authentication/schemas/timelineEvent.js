@@ -40,6 +40,7 @@ export default {
             name: 'item',
             title: 'Item',
             type: 'reference',
+            weak: true,
             to: [
                 {type: "Like", title: "Like"},
                 {type: "Comment", title: "Comment"},

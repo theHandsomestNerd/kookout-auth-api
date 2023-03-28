@@ -15,17 +15,21 @@ const convertToSlugObj = (slugStr: string): Slug => {
 };
 const getSanityDocumentRef = (
   sanityId: string,
+  isWeak?: boolean,
   setKey?: boolean,
 ): Reference => {
   let ref: any = {
     _type: 'reference',
     _ref: sanityId,
+    weak: isWeak,
   };
   if (setKey) {
     ref = { ...ref, _key: uuidv4() };
   }
   return ref;
 };
+
+
 const getSanityKeyedValue = (value: any) => {
   return {
     _key: uuidv4(),

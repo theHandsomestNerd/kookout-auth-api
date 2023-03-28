@@ -7,8 +7,7 @@ import {
     SanityBlock,
     SanityBlockRef,
     SanityComment,
-    SanityExtendedUserProfile, SanityExtendedUserProfileRef,
-    SanityFollowRef,
+    SanityExtendedUserProfile, SanityExtendedUserProfileRef, SanityFollow,
     SanityLike,
     SanityLikeRef, SanityTimelineEvent,
     SanityUser
@@ -160,7 +159,7 @@ const fetchUser = (userId: string): Promise<SanityUser | undefined> => {
         })
 }
 
-const fetchProfileLikes = (userId: string): Promise<SanityLikeRef[] | undefined> => {
+const fetchProfileLikes = (userId: string): Promise<SanityLike[] | undefined> => {
     const LOG = "fetch-profile-likes-" + userId
 
     return sanityClient
@@ -169,7 +168,7 @@ const fetchProfileLikes = (userId: string): Promise<SanityLikeRef[] | undefined>
           ${groqQueries.LIKE.members}
        }`,
             {userId, thisType: groqQueries.LIKE.type}
-        ).then((data: SanityLikeRef[]) => {
+        ).then((data: SanityLike[]) => {
             log(LOG, "NOTICE", "The raw Like", data)
 
             return data
@@ -241,7 +240,7 @@ const fetchBiDirectionalProfileBlocks = (userId: string): Promise<SanityBlock[] 
             return Promise.resolve(undefined);
         })
 }
-const fetchProfileFollows = (userId: string): Promise<SanityFollowRef[] | undefined> => {
+const fetchProfileFollows = (userId: string): Promise<SanityFollow[] | undefined> => {
     const LOG = "fetch-profile-likes-" + userId
 
     return sanityClient
@@ -250,7 +249,7 @@ const fetchProfileFollows = (userId: string): Promise<SanityFollowRef[] | undefi
           ${groqQueries.FOLLOW.members}
        }`,
             {userId, thisType: groqQueries.FOLLOW.type}
-        ).then((data: SanityFollowRef[]) => {
+        ).then((data: SanityFollow[]) => {
             log(LOG, "NOTICE", "The raw Follow", data)
 
             return data
@@ -451,7 +450,7 @@ const fetchProfileLike = (likeId: string): Promise<SanityLike> => {
           ${groqQueries.LIKE.members}
        }`, {
                 likeId: likeId,
-                theType: groqQueries.EXT_PROFILE.type
+                theType: groqQueries.LIKE.type
             }
         ).then((data: SanityLike[]) => {
             log(LOG, "NOTICE", "THe like raw", data)
@@ -460,7 +459,7 @@ const fetchProfileLike = (likeId: string): Promise<SanityLike> => {
                 log(LOG, "INFO", `No like for id: ${likeId}`)
             }
 
-            return data
+            return data[0]
         }).catch((e: any) => {
             const error = "Error retrieving like for" + likeId
             log(LOG, "ERROR", error, {error: e})

@@ -468,11 +468,17 @@ const getProfileLikes = async (req: any, res: any) => {
             res.status(400).json({error: "No valid user from this Access Token"})
         } else {
             const profileLikes = await cmsClient.fetchProfileLikes(id);
+            const amIInThisList = profileLikes?.find((like)=>{
+                if(like.liker._id === whoami.uid) {
+                    return true;
+                }
+                return false
+            })
 
             logClient.log(LOG_COMPONENT, "NOTICE",
-                "Profile Likes", profileLikes);
+                "Profile Likes", {profileLikes, amIInThisList});
 
-            res.status(200).send({profileLikes: profileLikes});
+            res.status(200).send({profileLikes: profileLikes, amIInThisList});
         }
     }
 }
@@ -566,11 +572,17 @@ const getProfileFollows = async (req: any, res: any) => {
             res.status(400).json({error: "No valid user from this Access Token"})
         } else {
             const profileFollows = await cmsClient.fetchProfileFollows(id);
+            const amIInThisList = profileFollows?.find((follow)=>{
+                if(follow.follower._id === whoami.uid) {
+                    return true;
+                }
+                return false
+            })
 
             logClient.log(LOG_COMPONENT, "NOTICE",
-                "Profile Follows", profileFollows);
+                "Profile Follows", {profileFollows,amIInThisList});
 
-            res.status(200).send({profileFollows: profileFollows});
+            res.status(200).send({profileFollows: profileFollows,amIInThisList});
         }
     }
 }

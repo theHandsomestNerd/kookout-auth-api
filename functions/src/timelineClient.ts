@@ -24,7 +24,7 @@ const profileLikeCreated = async (likeToRecord:SanityLikeRef)=>{
             actor: likeToRecord.liker,
             action: ACTION_TYPE_ENUM.LIKED,
             recipient: likeToRecord.likee,
-            item: cmsUtils.getSanityDocumentRef(likeToRecord._id),
+            item: cmsUtils.getSanityDocumentRef(likeToRecord._id, true),
         }
 
         log(LOG_COMPONENT, "INFO", "Creating timeline event for Like", newSanityDocument)
@@ -43,7 +43,7 @@ const profileFollowCreated = async (followToRecord:SanityFollowRef)=>{
             actor: followToRecord.follower,
             action: ACTION_TYPE_ENUM.FOLLOWED,
             recipient: followToRecord.followed,
-            item: cmsUtils.getSanityDocumentRef(followToRecord._id),
+            item: cmsUtils.getSanityDocumentRef(followToRecord._id, true),
         }
 
         log(LOG_COMPONENT, "INFO", "Creating timeline event for Follow", newSanityDocument)
@@ -62,7 +62,7 @@ const profileCommentCreated = async (createdComment:SanityCommentRef)=>{
             actor: createdComment.author,
             action: ACTION_TYPE_ENUM.COMMENTED,
             recipient: createdComment.recipient,
-            item: cmsUtils.getSanityDocumentRef(createdComment._id),
+            item: cmsUtils.getSanityDocumentRef(createdComment._id, true),
         }
 
         log(LOG_COMPONENT, "INFO", "Creating timeline event for Comment", newSanityDocument)
@@ -77,16 +77,17 @@ const profileCommentCreated = async (createdComment:SanityCommentRef)=>{
 const removeLike = async (alreadyRemovedLike:SanityLike)=>{
     const LOG_COMPONENT = "timeline-event-unlike-"+alreadyRemovedLike._id
 
+    log(LOG_COMPONENT, "INFO", "Creating timeline event for unlike ", alreadyRemovedLike)
     const newSanityDocument = {
         _type: groqQueries.TIMELINE_EVENT.type,
         isPublic: false,
         actor: cmsUtils.getSanityDocumentRef(alreadyRemovedLike.liker._id),
         action: ACTION_TYPE_ENUM.UNLIKED,
-        recipient: cmsUtils.getSanityDocumentRef(alreadyRemovedLike.likee._id),
+        recipient: cmsUtils.getSanityDocumentRef(alreadyRemovedLike.likee._id, true),
         // item: ,
     }
+    log(LOG_COMPONENT, "INFO", "timeline event for unlike", newSanityDocument)
 
-    log(LOG_COMPONENT, "INFO", "Creating timeline event for unlike", newSanityDocument)
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
         log(LOG_COMPONENT, "ERROR", "could not create timeline event for unlike", { removedLike: alreadyRemovedLike, e})
