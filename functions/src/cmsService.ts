@@ -56,16 +56,25 @@ const fetchProfileComments = async (userId:string, myUserId:string) =>{
 
     return cmsClient.fetchProfileComments(userId,blockedUserIds);
 }
+const fetchPosts = async (myUserId:string) =>{
+    var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(myUserId);
 
-const savePostImage = async (imageFile?: any, userId?: string, postBody?:string) => {
+    var blockedUserIds = blockedUsers?.map((blockedUser)=>{
+        return blockedUser.blocked._id
+    });
+
+    return cmsClient.fetchPosts(blockedUserIds);
+}
+
+const createPost = async (imageFile?: any, userId?: string, postBody?:string) => {
     if (userId) {
-        if (imageFile.filepath) {
-            return cmsClient.createUploadUserPostImage(imageFile.filepath, userId,postBody??"")
-        }
+        // if (imageFile.filepath) {
+            return cmsClient.uploadUserPost(imageFile?.filepath, userId,postBody)
+        // }
 
         return Promise.reject(Error("create post failed"))
     }
     return Promise.reject(Error("no userId"))
 }
 
-export default {createPost: savePostImage, fetchProfileComments,fetchProfileTimelineEvents, createProfileLike,removeLike, createProfileComment, createProfileFollow, fetchAllUsers}
+export default {fetchPosts, createPost, fetchProfileComments,fetchProfileTimelineEvents, createProfileLike,removeLike, createProfileComment, createProfileFollow, fetchAllUsers}

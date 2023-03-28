@@ -78,6 +78,6 @@ app.get("/get-timeline-events", chatController.getTimelineEvents);
 app.post("/create-post", chatController.createPost);
 // app.post("/delete-post", chatController.updateCreateExtendedProfile);
 // app.post("/get-post/:id", chatController.updateCreateExtendedProfile);
-// app.post("/get-posts", chatController.updateCreateExtendedProfile);
+app.get("/get-all-posts", chatController.getAllPosts);
 
 exports.app = functions.https.onRequest(app);

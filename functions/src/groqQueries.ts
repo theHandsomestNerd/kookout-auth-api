@@ -89,7 +89,7 @@ const POST = {
           author->,
           publishedAt,
           body,
-          mainImage->
+          mainImage
 `,
     type: "Post"
 }

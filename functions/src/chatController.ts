@@ -5,9 +5,9 @@ import {DecodedIdToken} from "firebase-admin/lib/auth";
 import {Height} from "../types";
 import cmsService from "./cmsService";
 import cmsUtils from "./cmsUtils";
-import path from "path";
-import os from "os";
-import fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import * as fs from "fs";
 
 const getExtendedProfile = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -617,6 +617,27 @@ const getProfileComments = async (req: any, res: any) => {
         }
     }
 }
+const getAllPosts = async (req: any, res: any) => {
+    const LOG_COMPONENT = `get-all-posts`
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "Get  Profile Posts Request")
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const profilePosts = await cmsService.fetchPosts(whoami.uid);
+
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "Posts", profilePosts);
+
+            res.status(200).send({posts: profilePosts});
+        }
+    }
+}
 
 const commentProfile = async (req: any, res: any) => {
 
@@ -650,7 +671,7 @@ const commentProfile = async (req: any, res: any) => {
     return res.status(401).json({commentStatus: "ERROR", body: "UNAUTHORIZED"});
 }
 const createPost = async (req: any, res: any) => {
-    const LOG_COMPONENT = "create post"
+    const LOG_COMPONENT = "create-post"
     logClient.log(LOG_COMPONENT, "NOTICE",
         "request to create post")
 
@@ -711,11 +732,11 @@ const createPost = async (req: any, res: any) => {
         //     appResp = await cmsClient.changeDisplayName(displayName, user.uid)
         // }
 
-        if (imageToBeUploaded && (imageToBeUploaded as any).filepath) {
+        // if (imageToBeUploaded && (imageToBeUploaded as any).filepath) {
             // upload to sanity
-            createPostResp = await cmsService.createPost(imageToBeUploaded, user.uid)
+            createPostResp = await cmsService.createPost(imageToBeUploaded, user.uid, postBody)
 
-        }
+        // }
 
 
         res.send({
@@ -749,6 +770,7 @@ export default {
     followProfile,
     unfollowProfile,
     getProfileFollows,
+    getAllPosts,
     // getProfileBlocks,
     getMyProfileBlocks,
     getTimelineEvents

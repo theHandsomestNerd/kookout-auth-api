@@ -11,7 +11,7 @@ import {
     SanityExtendedUserProfileRef,
     SanityFollow,
     SanityLike,
-    SanityLikeRef,
+    SanityLikeRef, SanityPost,
     SanityTimelineEvent,
     SanityUser
 } from "../types";
@@ -297,6 +297,39 @@ const fetchProfileComments = (userId: string, blockedIds?: string[]): Promise<Sa
             return Promise.resolve(undefined);
         })
 }
+const fetchPosts = (blockedIds?: string[]): Promise<SanityPost[] | undefined> => {
+    const LOG = "fetch-posts-"
+
+    var queryString = "_type == $thisType";
+    var queryParams: any = {
+        thisType: groqQueries.POST.type,
+    }
+
+    if (blockedIds && blockedIds.length > 0) {
+        log(LOG, "NOTICE", "I have blocked these users", blockedIds)
+        queryParams = {...queryParams, blockedIds: blockedIds}
+        queryString += " && !(author._ref in $blockedIds)"
+    }
+    log(LOG, "Notice", `All posts Query:`, {queryString, queryParams})
+
+
+    return sanityClient
+        .fetch(
+            `*[${queryString}]| order(publishedAt asc){
+          ${groqQueries.POST.members}
+       }`,
+            queryParams
+        ).then((data: SanityPost[]) => {
+            log(LOG, "NOTICE", "The raw Posts", data)
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving Posts"
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving Profile Posts: - ` + e.toString()))
+            return Promise.resolve(undefined);
+        })
+}
 
 const uploadUserProfileImage = async (filePath: any, userId: string): Promise<SanityImageAssetDocument> => {
     return sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
@@ -323,39 +356,49 @@ const uploadUserProfileImage = async (filePath: any, userId: string): Promise<Sa
             return Promise.reject(Error(`Error uploading user profile image asset to sanity for user ${userId} Error: ` + e.toString()))
         })
 }
-const uploadUserPost = async (filePath: any, userId: string, postBody:string): Promise<SanityImageAssetDocument> => {
-            const LOG_COMPONENT = "upload-user-post-image-" + userId
-    return sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
-        {filename: `${userId}-post-photo`})
-        .then(async (imageAsset: SanityImageAssetDocument) => {
+const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string): Promise<SanityImageAssetDocument> => {
+    const LOG_COMPONENT = "upload-user-post-image-" + userId
+
+    var imageAsset
+
+        if(filePath != null) {
+            imageAsset = await sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
+                {filename: `${userId}-post-photo`})
+
+
             log(LOG_COMPONENT, "NOTICE", "The post Image Asset uploaded", {imageAsset})
 
+        }
+            log(LOG_COMPONENT, "NOTICE", "The post body", {postBody})
 
-            const newSanityDocument = {
-                _type: groqQueries.POST.type,
-                author: cmsUtils.getSanityDocumentRef(userId),
-                body: postBody,
-                publishedAt: new Date(Date.now()),
-                mainImage: {
-                    _type: "image",
-                    asset: {
-                        _type: "reference",
-                        _ref: imageAsset._id
-                    }
+    var newSanityDocument = {
+        _type: groqQueries.POST.type,
+        author: cmsUtils.getSanityDocumentRef(userId ?? ""),
+        body: postBody,
+        publishedAt: new Date(Date.now()),
+    }
+
+    if(imageAsset != null && imageAsset._id != null) {
+        newSanityDocument = {
+            ...newSanityDocument,
+            mainImage: {
+                _type: "image",
+                asset: {
+                    _type: "reference",
+                    _ref: imageAsset._id
                 }
-            }
+            },
+        } as any;
+    }
 
-            log(LOG_COMPONENT, "INFO", "Creating Post", newSanityDocument)
+    log(LOG_COMPONENT, "INFO", "Creating Post", newSanityDocument)
 
-            return sanityClient.create(newSanityDocument).catch((e: any) => {
-                log(LOG_COMPONENT, "ERROR", "could not create post", {userId, postBody})
-                return e
-            })
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create post", {userId, postBody})
+        return e
+    })
 
-        })
-        .catch((e: any) => {
-            return Promise.reject(Error(`Error uploading user profile image asset to sanity for user ${userId} Error: ` + e.toString()))
-        })
+
 }
 
 const changeDisplayName = (displayName: string, firebaseUid: string) => {
@@ -412,8 +455,8 @@ const fetchAllUsers = (blockedIds?: string[]): Promise<SanityUser[]> => {
             return Promise.resolve([]);
         })
 }
-const fetchProfileTimelineEvents = (userId:string,blockedIds?: string[]): Promise<SanityTimelineEvent[]> => {
-    const LOG = "fetch-profile-timeline-events-"+userId
+const fetchProfileTimelineEvents = (userId: string, blockedIds?: string[]): Promise<SanityTimelineEvent[]> => {
+    const LOG = "fetch-profile-timeline-events-" + userId
 
     var queryString = "_type == $thisType && ((actor._ref != $userId && isPublic == true) || (recipient._ref == $userId && isPublic==false))";
     var queryParams: any = {
@@ -528,7 +571,7 @@ export default {
     fetchExtendedProfile,
     createUser,
     uploadUserProfileImage,
-    createUploadUserPostImage: uploadUserPost,
+    uploadUserPost,
     changeDisplayName,
     fetchUser,
     fetchAllUsers,
@@ -538,6 +581,7 @@ export default {
     fetchProfileLikes,
     // fetchProfileBlocks,
     fetchProfileComments,
+    fetchPosts,
     removeLike,
     createProfileComment,
     createProfileFollow,
