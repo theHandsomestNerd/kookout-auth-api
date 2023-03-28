@@ -10,161 +10,170 @@ const admin = require("firebase-admin")
 // const serviceAccount = require("./the-black-domain-firebase-adminsdk-h1hfd-f2d03fe336-service-account-2.json")
 
 
-
 const createUser = (email: string, password: string) => {
-  return admin.auth().createUser({
-    email,
-    emailVerified: false,
-    password: password,
-    displayName: email.split("@")[0],
-    // photoURL: "http://www.example.com/12345678/photo.png",
-    disabled: false
-  })
-    .then((userRecord: UserRecord) => {
-      // See the UserRecord reference doc for the contents of userRecord.
-      // console.log("Successfully created new user:", userRecord, password);
-      //create Sanity User
-      return userRecord
+    return admin.auth().createUser({
+        email,
+        emailVerified: false,
+        password: password,
+        displayName: email.split("@")[0],
+        // photoURL: "http://www.example.com/12345678/photo.png",
+        disabled: false
     })
-    .catch((error: any) => {
-      const errorCode = error.code
-      const errorMessage = error.message
-      console.log("ERROR creating new user:", email, password)
-      console.log(errorMessage, errorCode)
-      return Promise.reject(Error(errorMessage))
-      // ..
-    })
+        .then((userRecord: UserRecord) => {
+            // See the UserRecord reference doc for the contents of userRecord.
+            // console.log("Successfully created new user:", userRecord, password);
+            //create Sanity User
+            return userRecord
+        })
+        .catch((error: any) => {
+            const errorCode = error.code
+            const errorMessage = error.message
+            console.log("ERROR creating new user:", email, password)
+            console.log(errorMessage, errorCode)
+            return Promise.reject(Error(errorMessage))
+            // ..
+        })
 
 }
 
 const queryAllUsers = () => {
-  const listAllUsers = async (nextPageToken:string | undefined) =>  {
-    // List batch of users, 1000 at a time.
-    var allUsers:any[] = [];
-    await admin.auth()
-        .listUsers(1000, nextPageToken)
-        .then((listUsersResult:ListUsersResult) => {
-          listUsersResult.users.forEach((userRecord:UserRecord) => {
-            console.log('user', userRecord.toJSON());
-            allUsers.push(userRecord.toJSON())
-          });
-          if (listUsersResult.pageToken) {
-            // List next batch of users.
-            listAllUsers(listUsersResult.pageToken);
-          }
-        })
-        .catch((error:any) => {
-          console.log('Error listing users:', error);
-        });
-    return allUsers;
-  };
+    const listAllUsers = async (nextPageToken: string | undefined) => {
+        // List batch of users, 1000 at a time.
+        var allUsers: any[] = [];
+        await admin.auth()
+            .listUsers(1000, nextPageToken)
+            .then((listUsersResult: ListUsersResult) => {
+                listUsersResult.users.forEach((userRecord: UserRecord) => {
+                    console.log('user', userRecord.toJSON());
+                    allUsers.push(userRecord.toJSON())
+                });
+                if (listUsersResult.pageToken) {
+                    // List next batch of users.
+                    listAllUsers(listUsersResult.pageToken);
+                }
+            })
+            .catch((error: any) => {
+                console.log('Error listing users:', error);
+            });
+        return allUsers;
+    };
 // Start listing users from the beginning, 1000 at a time.
-  return listAllUsers(undefined);
+    return listAllUsers(undefined);
 
 
-  // return admin.auth().getUsers([])
-  //     .then((userResult: GetUsersResult) => {
-  //
-  //       return userResult
-  //     })
-  //     .catch((error: any) => {
-  //       const errorCode = error.code
-  //       const errorMessage = error.message
-  //       console.log("ERROR getting users:",error)
-  //       console.log(errorMessage, errorCode)
-  //       return Promise.reject(Error(errorMessage))
-  //       // ..
-  //     })
+    // return admin.auth().getUsers([])
+    //     .then((userResult: GetUsersResult) => {
+    //
+    //       return userResult
+    //     })
+    //     .catch((error: any) => {
+    //       const errorCode = error.code
+    //       const errorMessage = error.message
+    //       console.log("ERROR getting users:",error)
+    //       console.log(errorMessage, errorCode)
+    //       return Promise.reject(Error(errorMessage))
+    //       // ..
+    //     })
 
 }
 
 const getUser = (firebaseUserId: string): Promise<UserRecord> => {
-  return admin.auth().getUser(firebaseUserId)
-    .then((userRecord: UserRecord) => {
-      // See the UserRecord reference doc for the contents of userRecord.
-      // console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
-      return userRecord
-    })
-    .catch((error: any) => {
-      console.log("Error fetching user data:", error)
-      return {} as UserRecord
-    })
+    return admin.auth().getUser(firebaseUserId)
+        .then((userRecord: UserRecord) => {
+            // See the UserRecord reference doc for the contents of userRecord.
+            // console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
+            return userRecord
+        })
+        .catch((error: any) => {
+            console.log("Error fetching user data:", error)
+            return {} as UserRecord
+        })
 }
 
 const changeDisplayName = (displayName: string, firebaseUid: string) => {
-  return admin.auth().updateUser(firebaseUid, {
-    displayName: displayName
-  }).then((userRecord: UserRecord) => {
-    console.log("User Profile displayname updated correctly", userRecord)
-    return userRecord
-  }).catch((error: any) => {
-    console.log("Error updating user displayname:", error)
-    return {} as UserRecord
-  })
+    return admin.auth().updateUser(firebaseUid, {
+        displayName: displayName
+    }).then((userRecord: UserRecord) => {
+        console.log("User Profile displayname updated correctly", userRecord)
+        return userRecord
+    }).catch((error: any) => {
+        console.log("Error updating user displayname:", error)
+        return {} as UserRecord
+    })
 }
 
 const changeEmail = (email: string, firebaseUid: string) => {
-  return admin.auth().updateUser(firebaseUid, {
-    email: email
-  }).then((userRecord: UserRecord) => {
-    console.log("User Profile email updated correctly", userRecord)
-    return userRecord
-  }).catch((error: any) => {
-    console.log("Error updating user email:", error)
-    return {} as UserRecord
-  })
+    return admin.auth().updateUser(firebaseUid, {
+        email: email
+    }).then((userRecord: UserRecord) => {
+        console.log("User Profile email updated correctly", userRecord)
+        return userRecord
+    }).catch((error: any) => {
+        console.log("Error updating user email:", error)
+        return {} as UserRecord
+    })
 }
 
 const changeProfilePhotoURL = (photoURL: string, firebaseUid: string) => {
-  return admin.auth().updateUser(firebaseUid, {
-    photoURL: photoURL
-  }).then((userRecord: UserRecord) => {
-    console.log("User Profile photoURL updated correctly", userRecord)
-    return userRecord
-  }).catch((error: any) => {
-    console.log("Error updating user photoURL:", error)
-    return {} as UserRecord
-  })
+    return admin.auth().updateUser(firebaseUid, {
+        photoURL: photoURL
+    }).then((userRecord: UserRecord) => {
+        console.log("User Profile photoURL updated correctly", userRecord)
+        return userRecord
+    }).catch((error: any) => {
+        console.log("Error updating user photoURL:", error)
+        return {} as UserRecord
+    })
 }
 
 
 const saveUserProfileImage = async (imageFile?: any, userId?: string) => {
-  if (userId) {
-    if (imageFile.filepath) {
-      return cmsClient.uploadUserProfileImage(imageFile.filepath, userId)
-    }
+    if (userId) {
+        if (imageFile.filepath) {
+            return cmsClient.uploadUserProfileImage(imageFile.filepath, userId)
+        }
 
-    return Promise.reject(Error("no user profile image"))
-  }
-  return Promise.reject(Error("no userId"))
+        return Promise.reject(Error("no user profile image"))
+    }
+    return Promise.reject(Error("no userId"))
 }
 
 const findProvider = (firebaseUser: any, providerName: string) => {
-  return firebaseUser?.providerData?.find((provider: UserInfo) => {
-    if (provider.providerId === providerName) {
-      return provider;
-    }
-    return undefined;
-  });
+    return firebaseUser?.providerData?.find((provider: UserInfo) => {
+        if (provider.providerId === providerName) {
+            return provider;
+        }
+        return undefined;
+    });
 };
 
 const getUserFromAccessToken = async (accessToken: string): Promise<DecodedIdToken> => {
-  const LOG_COMPONENT = "get-user-id-from-access-token"
-  logClient.log(LOG_COMPONENT, "INFO",
-      "authenticating user...")
+    const LOG_COMPONENT = "get-user-id-from-access-token"
+    logClient.log(LOG_COMPONENT, "INFO",
+        "authenticating user...")
 
-  const processedToken = accessToken.replace("Bearer ", "")
-  const verifyTokenResponse: DecodedIdToken = await authClient.verifyToken(processedToken)
+    const processedToken = accessToken.replace("Bearer ", "")
+    const verifyTokenResponse: DecodedIdToken = await authClient.verifyToken(processedToken)
 
-  logClient.log(LOG_COMPONENT, "INFO",
-      "user authenticated? ", verifyTokenResponse !== undefined)
+    logClient.log(LOG_COMPONENT, "INFO",
+        "user authenticated? ", verifyTokenResponse !== undefined)
 
-  if(verifyTokenResponse === undefined){
-    logClient.log(LOG_COMPONENT, "ERROR",
-        "No valid user found");
-  }
+    if (verifyTokenResponse === undefined) {
+        logClient.log(LOG_COMPONENT, "ERROR",
+            "No valid user found");
+    }
 
-  return verifyTokenResponse
+    return verifyTokenResponse
 }
 
-export default { saveUserProfileImage, createUser, getUser, getUserFromAccessToken, changeDisplayName, changeEmail, changeProfilePhotoURL, queryAllUsers, findProvider}
+export default {
+    saveUserProfileImage,
+    createUser,
+    getUser,
+    getUserFromAccessToken,
+    changeDisplayName,
+    changeEmail,
+    changeProfilePhotoURL,
+    queryAllUsers,
+    findProvider
+}

@@ -57,4 +57,15 @@ const fetchProfileComments = async (userId:string, myUserId:string) =>{
     return cmsClient.fetchProfileComments(userId,blockedUserIds);
 }
 
-export default {fetchProfileComments,fetchProfileTimelineEvents, createProfileLike,removeLike, createProfileComment, createProfileFollow, fetchAllUsers}
+const savePostImage = async (imageFile?: any, userId?: string, postBody?:string) => {
+    if (userId) {
+        if (imageFile.filepath) {
+            return cmsClient.createUploadUserPostImage(imageFile.filepath, userId,postBody??"")
+        }
+
+        return Promise.reject(Error("create post failed"))
+    }
+    return Promise.reject(Error("no userId"))
+}
+
+export default {createPost: savePostImage, fetchProfileComments,fetchProfileTimelineEvents, createProfileLike,removeLike, createProfileComment, createProfileFollow, fetchAllUsers}

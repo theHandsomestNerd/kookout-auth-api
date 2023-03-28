@@ -23,7 +23,7 @@ const corsOptionsDelegate = (req: any, callback: any) => {
 
 app.use(cors(corsOptionsDelegate));
 app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '100mb',parameterLimit: 100000, extended: false},));
+app.use(express.urlencoded({limit: '100mb', parameterLimit: 100000, extended: false},));
 
 const Logger = function (req: any, res: any, next: any) {
     logClient.createLogger(req, res, next);
@@ -54,6 +54,7 @@ app.post("/unlike-profile", chatController.unlikeProfile);
 app.get("/get-profile-likes/:id", chatController.getProfileLikes);
 
 app.post("/comment-profile", chatController.commentProfile);
+// app.post("/uncomment-profile", chatController.commentProfile);
 app.get("/get-profile-comments/:id", chatController.getProfileComments);
 
 app.post("/follow-profile", chatController.followProfile);
@@ -67,6 +68,16 @@ app.get("/get-my-profile-blocks", chatController.getMyProfileBlocks);
 
 app.get("/get-timeline-events", chatController.getTimelineEvents);
 
+// app.post("/create-my-user-profile-photos-album", chatController.updateCreateExtendedProfile);
+// app.post("/create-my-user-photo", chatController.updateCreateExtendedProfile);
+// app.post("/create-my-user-profile-photo", chatController.updateCreateExtendedProfile);
+// app.post("/delete-my-album", chatController.updateCreateExtendedProfile);
+// app.post("/get-album/:id", chatController.updateCreateExtendedProfile);
+// app.post("/get-albums/:userId", chatController.updateCreateExtendedProfile);
 
+app.post("/create-post", chatController.createPost);
+// app.post("/delete-post", chatController.updateCreateExtendedProfile);
+// app.post("/get-post/:id", chatController.updateCreateExtendedProfile);
+// app.post("/get-posts", chatController.updateCreateExtendedProfile);
 
 exports.app = functions.https.onRequest(app);

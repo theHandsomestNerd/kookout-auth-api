@@ -24,7 +24,7 @@ export type SanityTimelineEvent = {
     actor: SanityUser,
     recipient: SanityUser,
     action: string
-    isPublic:boolean
+    isPublic: boolean
     item: SanityLike | SanityUser | SanityComment | SanityFollow
 }
 export type SanityBlockRef = {
@@ -68,7 +68,7 @@ export type SanityExtendedUserProfile = {
     hashtags: string[],
     ethnicity: string,
     userId: string,
-    userRef:SanityUser,
+    userRef: SanityUser,
     iAm: string,
     imInto: string,
     imOpenTo: string,
@@ -99,7 +99,7 @@ export type SanityExtendedUserProfileRef = {
     hashtags: string[],
     ethnicity: string,
     userId: string,
-    userRef:Reference,
+    userRef: Reference,
     iAm: string,
     imInto: string,
     imOpenTo: string,
@@ -122,6 +122,18 @@ export type SanityPost = {
     title: string,
     slug: Slug,
     author: SanityUser,
+
+    mainImage: ImageAsset,
+    categories: SanityCategory[],
+    publishedAt: Date,
+    body: string,
+}
+export type SanityPostRef = {
+    _type: string,
+    _id: string,
+    title: string,
+    slug: Slug,
+    author: Reference,
 
     mainImage: ImageAsset,
     categories: SanityCategory[],

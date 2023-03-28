@@ -7,9 +7,12 @@ import {
     SanityBlock,
     SanityBlockRef,
     SanityComment,
-    SanityExtendedUserProfile, SanityExtendedUserProfileRef, SanityFollow,
+    SanityExtendedUserProfile,
+    SanityExtendedUserProfileRef,
+    SanityFollow,
     SanityLike,
-    SanityLikeRef, SanityTimelineEvent,
+    SanityLikeRef,
+    SanityTimelineEvent,
     SanityUser
 } from "../types";
 import groqQueries from "./groqQueries";
@@ -320,6 +323,40 @@ const uploadUserProfileImage = async (filePath: any, userId: string): Promise<Sa
             return Promise.reject(Error(`Error uploading user profile image asset to sanity for user ${userId} Error: ` + e.toString()))
         })
 }
+const uploadUserPost = async (filePath: any, userId: string, postBody:string): Promise<SanityImageAssetDocument> => {
+            const LOG_COMPONENT = "upload-user-post-image-" + userId
+    return sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
+        {filename: `${userId}-post-photo`})
+        .then(async (imageAsset: SanityImageAssetDocument) => {
+            log(LOG_COMPONENT, "NOTICE", "The post Image Asset uploaded", {imageAsset})
+
+
+            const newSanityDocument = {
+                _type: groqQueries.POST.type,
+                author: cmsUtils.getSanityDocumentRef(userId),
+                body: postBody,
+                publishedAt: new Date(Date.now()),
+                mainImage: {
+                    _type: "image",
+                    asset: {
+                        _type: "reference",
+                        _ref: imageAsset._id
+                    }
+                }
+            }
+
+            log(LOG_COMPONENT, "INFO", "Creating Post", newSanityDocument)
+
+            return sanityClient.create(newSanityDocument).catch((e: any) => {
+                log(LOG_COMPONENT, "ERROR", "could not create post", {userId, postBody})
+                return e
+            })
+
+        })
+        .catch((e: any) => {
+            return Promise.reject(Error(`Error uploading user profile image asset to sanity for user ${userId} Error: ` + e.toString()))
+        })
+}
 
 const changeDisplayName = (displayName: string, firebaseUid: string) => {
     const LOG = `change-displayname-${firebaseUid}`;
@@ -491,6 +528,7 @@ export default {
     fetchExtendedProfile,
     createUser,
     uploadUserProfileImage,
+    createUploadUserPostImage: uploadUserPost,
     changeDisplayName,
     fetchUser,
     fetchAllUsers,

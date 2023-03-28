@@ -5,6 +5,9 @@ import {DecodedIdToken} from "firebase-admin/lib/auth";
 import {Height} from "../types";
 import cmsService from "./cmsService";
 import cmsUtils from "./cmsUtils";
+import path from "path";
+import os from "os";
+import fs from "fs";
 
 const getExtendedProfile = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -468,8 +471,8 @@ const getProfileLikes = async (req: any, res: any) => {
             res.status(400).json({error: "No valid user from this Access Token"})
         } else {
             const profileLikes = await cmsClient.fetchProfileLikes(id);
-            const amIInThisList = profileLikes?.find((like)=>{
-                if(like.liker._id === whoami.uid) {
+            const amIInThisList = profileLikes?.find((like) => {
+                if (like.liker._id === whoami.uid) {
                     return true;
                 }
                 return false
@@ -572,17 +575,17 @@ const getProfileFollows = async (req: any, res: any) => {
             res.status(400).json({error: "No valid user from this Access Token"})
         } else {
             const profileFollows = await cmsClient.fetchProfileFollows(id);
-            const amIInThisList = profileFollows?.find((follow)=>{
-                if(follow.follower._id === whoami.uid) {
+            const amIInThisList = profileFollows?.find((follow) => {
+                if (follow.follower._id === whoami.uid) {
                     return true;
                 }
                 return false
             })
 
             logClient.log(LOG_COMPONENT, "NOTICE",
-                "Profile Follows", {profileFollows,amIInThisList});
+                "Profile Follows", {profileFollows, amIInThisList});
 
-            res.status(200).send({profileFollows: profileFollows,amIInThisList});
+            res.status(200).send({profileFollows: profileFollows, amIInThisList});
         }
     }
 }
@@ -646,6 +649,89 @@ const commentProfile = async (req: any, res: any) => {
 
     return res.status(401).json({commentStatus: "ERROR", body: "UNAUTHORIZED"});
 }
+const createPost = async (req: any, res: any) => {
+    const LOG_COMPONENT = "create post"
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "request to create post")
+
+    // use token to get firebaseUser and uid
+    const user = await authService.getUserFromAccessToken(req.headers.authorization)
+    if (!user.uid) {
+        logClient.log(LOG_COMPONENT, "ERROR",
+            "No valid user from this Access Token")
+        return res.status(400).json({error: "No valid user from this Access Token"})
+    }
+
+    // TODO: BLOG ABOUT WTF this SHAT is doing
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const busboyC = require("busboy")
+    const busboy = busboyC({headers: req.headers})
+
+    let imageToBeUploaded = {}
+    let imageFileName
+
+    const otherFormData: any = {}
+
+    busboy.on("file", (fieldname: any, file: any, info: any) => {
+        const {filename, encoding, mimeType} = info
+
+        logClient.log(LOG_COMPONENT, "INFO",
+            "processing file from create post req:");
+
+        logClient.log(LOG_COMPONENT, "INFO",
+            "Data from post req image file", {fieldname, file, filename, encoding, mimeType});
+
+        // if (mimeType !== "image/jpeg" && mimeType !== "image/png") {
+        //     return res.status(400).json({error: "Wrong file type submitted"})
+        // }
+
+        const imageExtension = filename.split(".")[filename.split(".").length - 1]
+
+        imageFileName = `${Math.round(
+            Math.random() * 1000000000000
+        ).toString()}.${imageExtension}`
+        const filepath = path.join(os.tmpdir(), imageFileName)
+        imageToBeUploaded = {filepath, mimeType}
+
+        const stream = fs.createWriteStream(filepath)
+
+        file.pipe(stream)
+    })
+
+    busboy.on("finish", async () => {
+
+        const {postBody} = otherFormData
+
+        logClient.log(LOG_COMPONENT, "INFO",
+            "image complete uploaded...processing other data", {postBody})
+
+        let createPostResp
+        // if (displayName) {
+        //     displayResp = await authService.changeDisplayName(displayName, user.uid)
+        //     appResp = await cmsClient.changeDisplayName(displayName, user.uid)
+        // }
+
+        if (imageToBeUploaded && (imageToBeUploaded as any).filepath) {
+            // upload to sanity
+            createPostResp = await cmsService.createPost(imageToBeUploaded, user.uid)
+
+        }
+
+
+        res.send({
+            postCreated: createPostResp
+        })
+        return;
+    })
+
+    busboy.on("field", (name: any, val: any, info: any) => {
+        logClient.log("get-auth-user", "DEBUG",
+            `Field [${name}]: value: %j`, val);
+        otherFormData[name] = val
+    })
+
+    busboy.end(req.rawBody)
+}
 export default {
     getMyProfile,
     getExtendedProfile,
@@ -658,6 +744,7 @@ export default {
     unlikeProfile,
     unblockProfile,
     commentProfile,
+    createPost,
     getProfileComments,
     followProfile,
     unfollowProfile,
