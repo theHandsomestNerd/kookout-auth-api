@@ -179,26 +179,26 @@ const fetchProfileLikes = (userId: string): Promise<SanityLike[] | undefined> =>
             return Promise.resolve(undefined);
         })
 }
-const fetchProfileBlocks = (userId: string): Promise<SanityBlockRef[] | undefined> => {
-    const LOG = "fetch-profile-blocks-" + userId
-
-    return sanityClient
-        .fetch(
-            `*[_type == $thisType && blocked._ref == $userId ]{
-          ${groqQueries.BLOCK.members}
-       }`,
-            {userId, thisType: groqQueries.BLOCK.type}
-        ).then((data: SanityLikeRef[]) => {
-            log(LOG, "NOTICE", "The raw blocks", data)
-
-            return data
-        }).catch((e: any) => {
-            const error = "Error retrieving Blocks"
-            log(LOG, "ERROR", error, {error: e})
-            console.log(Error(`Error retrieving User Blocks: ${userId} - ` + e.toString()))
-            return Promise.resolve(undefined);
-        })
-}
+// const fetchProfileBlocks = (userId: string): Promise<SanityBlockRef[] | undefined> => {
+//     const LOG = "fetch-profile-blocks-" + userId
+//
+//     return sanityClient
+//         .fetch(
+//             `*[_type == $thisType && blocked._ref == $userId ]{
+//           ${groqQueries.BLOCK.members}
+//        }`,
+//             {userId, thisType: groqQueries.BLOCK.type}
+//         ).then((data: SanityLikeRef[]) => {
+//             log(LOG, "NOTICE", "The raw blocks", data)
+//
+//             return data
+//         }).catch((e: any) => {
+//             const error = "Error retrieving Blocks"
+//             log(LOG, "ERROR", error, {error: e})
+//             console.log(Error(`Error retrieving User Blocks: ${userId} - ` + e.toString()))
+//             return Promise.resolve(undefined);
+//         })
+// }
 const fetchMyProfileBlocks = (userId: string): Promise<SanityBlockRef[] | undefined> => {
     const LOG = "fetch-my-profile-blocks-" + userId
 
@@ -498,7 +498,7 @@ export default {
     fetchProfileLike,
     createProfileBlock,
     fetchProfileLikes,
-    fetchProfileBlocks,
+    // fetchProfileBlocks,
     fetchProfileComments,
     removeLike,
     createProfileComment,

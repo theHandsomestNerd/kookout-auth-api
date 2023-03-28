@@ -62,8 +62,11 @@ app.get("/get-profile-follows/:id", chatController.getProfileFollows);
 
 app.post("/block-profile", chatController.blockProfile);
 app.post("/unblock-profile", chatController.unblockProfile);
-app.get("/get-profile-blocks/:id", chatController.getProfileBlocks);
+// app.get("/get-profile-blocks/:id", chatController.getProfileBlocks);
 app.get("/get-my-profile-blocks", chatController.getMyProfileBlocks);
 
 app.get("/get-timeline-events", chatController.getTimelineEvents);
+
+
+
 exports.app = functions.https.onRequest(app);

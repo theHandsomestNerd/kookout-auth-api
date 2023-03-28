@@ -503,34 +503,34 @@ const getTimelineEvents = async (req: any, res: any) => {
         }
     }
 }
-const getProfileBlocks = async (req: any, res: any) => {
-    const {id}: { id: string } = req.params
-    const LOG_COMPONENT = `get-profile-blocks-${id}`
-    logClient.log(LOG_COMPONENT, "ERROR",
-        "Get  Profile Blocks Request", id)
-    if (!id) {
-        logClient.log(LOG_COMPONENT, "ERROR",
-            "Error no user id in get profile block req", id)
-
-        return res.send({status: "404", message: "no id present in url for get profile block request"})
-    }
-
-    const headers = req.headers;
-    if (headers.authorization) {
-        const whoami = await authService.getUserFromAccessToken(headers.authorization);
-
-        if (!whoami.uid) {
-            res.status(400).json({error: "No valid user from this Access Token"})
-        } else {
-            const profileBlocks = await cmsClient.fetchProfileBlocks(id);
-
-            logClient.log(LOG_COMPONENT, "NOTICE",
-                "Profile Blocks", profileBlocks);
-
-            res.status(200).send({profileBlocks});
-        }
-    }
-}
+// const getProfileBlocks = async (req: any, res: any) => {
+//     const {id}: { id: string } = req.params
+//     const LOG_COMPONENT = `get-profile-blocks-${id}`
+//     logClient.log(LOG_COMPONENT, "ERROR",
+//         "Get  Profile Blocks Request", id)
+//     if (!id) {
+//         logClient.log(LOG_COMPONENT, "ERROR",
+//             "Error no user id in get profile block req", id)
+//
+//         return res.send({status: "404", message: "no id present in url for get profile block request"})
+//     }
+//
+//     const headers = req.headers;
+//     if (headers.authorization) {
+//         const whoami = await authService.getUserFromAccessToken(headers.authorization);
+//
+//         if (!whoami.uid) {
+//             res.status(400).json({error: "No valid user from this Access Token"})
+//         } else {
+//             const profileBlocks = await cmsClient.fetchProfileBlocks(id);
+//
+//             logClient.log(LOG_COMPONENT, "NOTICE",
+//                 "Profile Blocks", profileBlocks);
+//
+//             res.status(200).send({profileBlocks});
+//         }
+//     }
+// }
 const getMyProfileBlocks = async (req: any, res: any) => {
     const LOG_COMPONENT = `get-my-profile-blocks`
     logClient.log(LOG_COMPONENT, "INFO",
@@ -662,7 +662,7 @@ export default {
     followProfile,
     unfollowProfile,
     getProfileFollows,
-    getProfileBlocks,
+    // getProfileBlocks,
     getMyProfileBlocks,
     getTimelineEvents
 }
