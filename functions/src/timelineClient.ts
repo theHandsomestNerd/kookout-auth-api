@@ -1,4 +1,4 @@
-import {SanityCommentRef, SanityFollowRef, SanityLike, SanityLikeRef, SanityPostRef} from "../types";
+import {SanityCommentRef, SanityFollow, SanityFollowRef, SanityLike, SanityLikeRef, SanityPostRef} from "../types";
 import groqQueries from "./groqQueries";
 import cmsUtils from "./cmsUtils";
 import {log} from "./logClient";
@@ -24,7 +24,7 @@ const profileLikeCreated = async (likeToRecord:SanityLikeRef)=>{
             actor: likeToRecord.liker,
             action: ACTION_TYPE_ENUM.LIKED,
             recipient: likeToRecord.likee,
-            item: cmsUtils.getSanityDocumentRef(likeToRecord._id, true),
+            item: cmsUtils.getSanityDocumentRef(likeToRecord._id),
         }
 
         log(LOG_COMPONENT, "INFO", "Creating timeline event for Like", newSanityDocument)
@@ -42,7 +42,7 @@ const postCreated = async (post:SanityPostRef)=>{
             isPublic: true,
             actor: post.author,
             action: ACTION_TYPE_ENUM.POSTED,
-            item: cmsUtils.getSanityDocumentRef(post._id, true),
+            item: cmsUtils.getSanityDocumentRef(post._id),
         }
 
         log(LOG_COMPONENT, "INFO", "Creating timeline event for Post", newSanityDocument)
@@ -61,7 +61,7 @@ const profileFollowCreated = async (followToRecord:SanityFollowRef)=>{
             actor: followToRecord.follower,
             action: ACTION_TYPE_ENUM.FOLLOWED,
             recipient: followToRecord.followed,
-            item: cmsUtils.getSanityDocumentRef(followToRecord._id, true),
+            item: cmsUtils.getSanityDocumentRef(followToRecord._id),
         }
 
         log(LOG_COMPONENT, "INFO", "Creating timeline event for Follow", newSanityDocument)
@@ -80,7 +80,7 @@ const profileCommentCreated = async (createdComment:SanityCommentRef)=>{
             actor: createdComment.author,
             action: ACTION_TYPE_ENUM.COMMENTED,
             recipient: createdComment.recipient,
-            item: cmsUtils.getSanityDocumentRef(createdComment._id, true),
+            item: cmsUtils.getSanityDocumentRef(createdComment._id),
         }
 
         log(LOG_COMPONENT, "INFO", "Creating timeline event for Comment", newSanityDocument)
@@ -101,7 +101,7 @@ const removeLike = async (alreadyRemovedLike:SanityLike)=>{
         isPublic: false,
         actor: cmsUtils.getSanityDocumentRef(alreadyRemovedLike.liker._id),
         action: ACTION_TYPE_ENUM.UNLIKED,
-        recipient: cmsUtils.getSanityDocumentRef(alreadyRemovedLike.likee._id, true),
+        recipient: cmsUtils.getSanityDocumentRef(alreadyRemovedLike.likee._id),
         // item: ,
     }
     log(LOG_COMPONENT, "INFO", "timeline event for unlike", newSanityDocument)
@@ -112,4 +112,24 @@ const removeLike = async (alreadyRemovedLike:SanityLike)=>{
         return e
     })
 }
-export default {postCreated, profileLikeCreated, removeLike, profileCommentCreated, profileFollowCreated}
+
+const removeFollow = async (alreadyRemovedFollow:SanityFollow)=>{
+    const LOG_COMPONENT = "timeline-event-unfollow-"+alreadyRemovedFollow._id
+
+    log(LOG_COMPONENT, "INFO", "Creating timeline event for unfollow ", alreadyRemovedFollow)
+    const newSanityDocument = {
+        _type: groqQueries.TIMELINE_EVENT.type,
+        isPublic: false,
+        actor: cmsUtils.getSanityDocumentRef(alreadyRemovedFollow.follower._id),
+        action: ACTION_TYPE_ENUM.UNFOLLOWED,
+        recipient: cmsUtils.getSanityDocumentRef(alreadyRemovedFollow.followed._id),
+    }
+    log(LOG_COMPONENT, "INFO", "timeline event for unfollow", newSanityDocument)
+
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create timeline event for unfollow", { removedLike: alreadyRemovedFollow, e})
+        return e
+    })
+}
+export default {removeFollow, postCreated, profileLikeCreated, removeLike, profileCommentCreated, profileFollowCreated}

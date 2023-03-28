@@ -361,15 +361,15 @@ const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string
 
     var imageAsset
 
-        if(filePath != null) {
-            imageAsset = await sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
-                {filename: `${userId}-post-photo`})
+    if (filePath != null) {
+        imageAsset = await sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
+            {filename: `${userId}-post-photo`})
 
 
-            log(LOG_COMPONENT, "NOTICE", "The post Image Asset uploaded", {imageAsset})
+        log(LOG_COMPONENT, "NOTICE", "The post Image Asset uploaded", {imageAsset})
 
-        }
-            log(LOG_COMPONENT, "NOTICE", "The post body", {postBody})
+    }
+    log(LOG_COMPONENT, "NOTICE", "The post body", {postBody})
 
     var newSanityDocument = {
         _type: groqQueries.POST.type,
@@ -378,7 +378,7 @@ const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string
         publishedAt: new Date(Date.now()),
     }
 
-    if(imageAsset != null && imageAsset._id != null) {
+    if (imageAsset != null && imageAsset._id != null) {
         newSanityDocument = {
             ...newSanityDocument,
             mainImage: {
@@ -477,18 +477,47 @@ const fetchProfileTimelineEvents = (userId: string, blockedIds?: string[]): Prom
             `*[${queryString}]{
           ${groqQueries.TIMELINE_EVENT.members}
        }`, queryParams
-        ).then((data: SanityUser[]) => {
+        ).then((data: SanityTimelineEvent[]) => {
             // log(LOG, "NOTICE", "The users raw", data)
 
             if (!data) {
-                console.log(Error(`Error retrieving users: `))
+                console.log(Error(`Error retrieving timeline events: `))
             }
 
             return data
         }).catch((e: any) => {
-            const error = "Error retrieving Users"
+            const error = "Error retrieving timeline events"
             log(LOG, "ERROR", error, {error: e})
             // console.log(Error(`Error retrieving Users Error: - ` + e.toString()))
+            return Promise.resolve([]);
+        })
+}
+const fetchProfileTimelineEventsRef = (referenceId: string): Promise<SanityTimelineEvent[]> => {
+    const LOG = "fetch-profile-timeline-events-refs-" + referenceId
+
+    var queryString = "_type == $thisType && references($referenceId)";
+    var queryParams: any = {
+        thisType: groqQueries.TIMELINE_EVENT.type,
+        referenceId,
+    }
+
+    log(LOG, "NOTICE", "TImeline refs query string", {queryString, queryParams})
+
+    return sanityClient
+        .delete({
+                query: `*[_type == '${groqQueries.TIMELINE_EVENT.type}' && references('${referenceId}')][0...999]`
+            }).then((data: any) => {
+            log(LOG, "NOTICE", "The timeline event refs raw", data)
+
+            if (!data) {
+                console.log(Error(`Error retrieving timeline events: `))
+            }
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving timeline events"
+            log(LOG, "ERROR", error, {error: e})
+            // console.log(Error(`Error retrieving timeline events Error: - ` + e.toString()))
             return Promise.resolve([]);
         })
 }
@@ -547,6 +576,32 @@ const fetchProfileLike = (likeId: string): Promise<SanityLike> => {
             return Promise.resolve([]);
         })
 }
+const fetchProfileFollow = (followId: string): Promise<SanityFollow> => {
+    const LOG = "fetch-profile-follow-" + followId
+
+    return sanityClient
+        .fetch(
+            `*[_type == $theType && _id == $followId]{
+          ${groqQueries.FOLLOW.members}
+       }`, {
+                followId: followId,
+                theType: groqQueries.FOLLOW.type
+            }
+        ).then((data: SanityFollow[]) => {
+            log(LOG, "NOTICE", "THe follow raw", data)
+
+            if (!data[0]) {
+                log(LOG, "INFO", `No follow for id: ${followId}`)
+            }
+
+            return data[0]
+        }).catch((e: any) => {
+            const error = "Error retrieving follow for" + followId
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving follow Error for id: ${followId}: - ` + e.toString()))
+            return Promise.resolve([]);
+        })
+}
 
 const createProfileComment = async (commenterUserId: string, profileUserId: string, commentBody: string) => {
     const LOG_COMPONENT = "create-profile-comment-profile-" + profileUserId + "-comment-by-" + commenterUserId
@@ -587,8 +642,10 @@ export default {
     createProfileFollow,
     removeFollow,
     fetchProfileFollows,
+    fetchProfileFollow,
     removeBlock,
     fetchMyProfileBlocks,
     fetchBiDirectionalProfileBlocks,
-    fetchProfileTimelineEvents
+    fetchProfileTimelineEvents,
+    fetchProfileTimelineEventsRef
 };

@@ -9,11 +9,29 @@ const createProfileLike = async (likerUserId: string, likeeUserId: string) => {
 }
 
 const removeLike = async (likeId: string) => {
+    // find the timelines that reference this like and
+    await cmsClient.fetchProfileTimelineEventsRef(likeId);
+    // var deleteTimelineEventResponse = await cmsClient.removeTimelineEvents
+
+
     var removedLike = await cmsClient.fetchProfileLike(likeId);
     var removedLikeResponse = await cmsClient.removeLike(likeId);
 
     await timelineClient.removeLike(removedLike);
     return removedLikeResponse;
+}
+
+const removeFollow = async (followId: string) => {
+    // find the timelines that reference this like and
+    await cmsClient.fetchProfileTimelineEventsRef(followId);
+    // var deleteTimelineEventResponse = await cmsClient.removeTimelineEvents
+
+
+    var removedFollow = await cmsClient.fetchProfileFollow(followId);
+    var removedFollowResponse = await cmsClient.removeFollow(followId);
+
+    await timelineClient.removeFollow(removedFollow);
+    return removedFollowResponse;
 }
 
 const createProfileComment = async (commenterUserId: string, profileUserId: string, commentBody: string) => {
@@ -84,6 +102,7 @@ export default {
     fetchProfileTimelineEvents,
     createProfileLike,
     removeLike,
+    removeFollow,
     createProfileComment,
     createProfileFollow,
     fetchAllUsers

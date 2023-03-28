@@ -433,7 +433,7 @@ const unfollowProfile = async (req: any, res: any) => {
         logClient.log(LOG_COMPONENT, "NOTICE",
             "request to unfollow profile by ", whoami);
 
-        const followStatus = await cmsClient.removeFollow(followId);
+        const followStatus = await cmsService.removeFollow(followId);
         if (followStatus.transactionId) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "deleted a Sanity Follow", {unfollowStatus: "SUCCESS"});
