@@ -1,4 +1,4 @@
-import {SanityCommentRef, SanityFollowRef, SanityLike, SanityLikeRef} from "../types";
+import {SanityCommentRef, SanityFollowRef, SanityLike, SanityLikeRef, SanityPostRef} from "../types";
 import groqQueries from "./groqQueries";
 import cmsUtils from "./cmsUtils";
 import {log} from "./logClient";
@@ -31,6 +31,24 @@ const profileLikeCreated = async (likeToRecord:SanityLikeRef)=>{
 
         return sanityClient.create(newSanityDocument).catch((e: any) => {
             log(LOG_COMPONENT, "ERROR", "could not create timeline event for like", { likeToRecord, e})
+            return e
+        })
+}
+const postCreated = async (post:SanityPostRef)=>{
+        const LOG_COMPONENT = "timeline-event-post-created-"+post.author._ref
+
+        const newSanityDocument = {
+            _type: groqQueries.TIMELINE_EVENT.type,
+            isPublic: true,
+            actor: post.author,
+            action: ACTION_TYPE_ENUM.POSTED,
+            item: cmsUtils.getSanityDocumentRef(post._id, true),
+        }
+
+        log(LOG_COMPONENT, "INFO", "Creating timeline event for Post", newSanityDocument)
+
+        return sanityClient.create(newSanityDocument).catch((e: any) => {
+            log(LOG_COMPONENT, "ERROR", "could not create timeline event for Post", { post, e})
             return e
         })
 }
@@ -94,4 +112,4 @@ const removeLike = async (alreadyRemovedLike:SanityLike)=>{
         return e
     })
 }
-export default {profileLikeCreated, removeLike, profileCommentCreated, profileFollowCreated}
+export default {postCreated, profileLikeCreated, removeLike, profileCommentCreated, profileFollowCreated}

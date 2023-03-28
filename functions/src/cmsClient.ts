@@ -11,7 +11,7 @@ import {
     SanityExtendedUserProfileRef,
     SanityFollow,
     SanityLike,
-    SanityLikeRef, SanityPost,
+    SanityLikeRef, SanityPost, SanityPostRef,
     SanityTimelineEvent,
     SanityUser
 } from "../types";
@@ -356,7 +356,7 @@ const uploadUserProfileImage = async (filePath: any, userId: string): Promise<Sa
             return Promise.reject(Error(`Error uploading user profile image asset to sanity for user ${userId} Error: ` + e.toString()))
         })
 }
-const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string): Promise<SanityImageAssetDocument> => {
+const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string): Promise<SanityPostRef> => {
     const LOG_COMPONENT = "upload-user-post-image-" + userId
 
     var imageAsset
