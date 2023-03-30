@@ -33,11 +33,17 @@ const getExtendedProfile = async (req: any, res: any) => {
         } else {
             const extProfile = await cmsClient.fetchExtendedProfile(id);
 
-            const response = extProfile[0] ? extProfile[0] : null
+            const response = extProfile.length == 1 ? extProfile[0] : null
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "Ext Profile Resp:", response);
 
-            return res.status(200).send({extendedProfile: response});
+            if(extProfile.length == 0 ){
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
+                "Delivering 400:", response);
+                return res.status(200).send({noExtendedProfile: "No Ext profile", userId: whoami.uid});
+            }
+
+            return res.status(200).send({extendedProfile: response ?? "No Extended Profile"});
         }
     }
 }
@@ -59,7 +65,7 @@ const getAllProfiles = async (req: any, res: any) => {
             const allUsers = await cmsService.fetchAllUsers(whoami.uid);
 
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
-                "GET all profiles RESULTS", allUsers);
+                "num GET all profiles RESULTS", allUsers.length);
 
             return res.send({profiles: [...allUsers]});
         }
@@ -500,7 +506,7 @@ const getTimelineEvents = async (req: any, res: any) => {
             const profileTimelineEvents = await cmsService.fetchProfileTimelineEvents(whoami.uid);
 
             logClient.log(LOG_COMPONENT, "NOTICE",
-                "Profile TimelineEvents", profileTimelineEvents);
+                "num Profile TimelineEvents", profileTimelineEvents.length);
 
             res.status(200).send({profileTimelineEvents: profileTimelineEvents});
         }
