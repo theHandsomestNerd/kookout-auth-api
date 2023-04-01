@@ -493,7 +493,7 @@ const getProfileLikes = async (req: any, res: any) => {
 }
 const getTimelineEvents = async (req: any, res: any) => {
     const LOG_COMPONENT = `get-timeline-events`
-    logClient.log(LOG_COMPONENT, "ERROR",
+    logClient.log(LOG_COMPONENT, "NOTICE",
         "Get  Profile TimelineEvents Request")
 
     const headers = req.headers;
@@ -633,16 +633,17 @@ const getAllPosts = async (req: any, res: any) => {
         const whoami = await authService.getUserFromAccessToken(headers.authorization);
 
         if (!whoami.uid) {
-            res.status(400).json({error: "No valid user from this Access Token"})
+            return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
             const profilePosts = await cmsService.fetchPosts(whoami.uid);
 
             logClient.log(LOG_COMPONENT, "NOTICE",
                 "Posts", profilePosts);
 
-            res.status(200).send({posts: profilePosts});
+            return res.status(200).send({posts: profilePosts});
         }
     }
+    return res.status(401).send({message: "NOt authorized", posts:[]});
 }
 
 const commentProfile = async (req: any, res: any) => {
