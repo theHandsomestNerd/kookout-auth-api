@@ -32,9 +32,12 @@ const Logger = function (req: any, res: any, next: any) {
 
 app.use(Logger);
 
+logClient.log("cookout-api", "NOTICE",
+    `The server can be reached: Running version - `, process.env.npm_package_version);
+
 app.get("/health-endpoint", (req, res, next) => {
     logClient.log("server-side-health-endpoint", "NOTICE",
-        "Hello from the Server Siiiiiide", req.params);
+        `The server can be reached: Running version ${process.env.npm_package_version}`, req.params);
 
     res.send({status: "200"});
 });

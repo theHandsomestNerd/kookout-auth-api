@@ -64,3 +64,6 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+#Sanity.io project build directory in monoRepo
+/the-handsomest-nerd-authentication/dist/
