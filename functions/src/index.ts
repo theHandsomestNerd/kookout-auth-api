@@ -4,6 +4,7 @@ import * as cors from "cors";
 import * as logClient from "./logClient";
 import chatController from "./chatController";
 import authController from "./authController";
+const version = require('./version.js');
 
 const app = express();
 const corsOptionsDelegate = (req: any, callback: any) => {
@@ -33,11 +34,11 @@ const Logger = function (req: any, res: any, next: any) {
 app.use(Logger);
 
 logClient.log("cookout-api", "NOTICE",
-    `The server can be reached: Running version - `, process.env.npm_package_version);
+    `The server can be reached: Running version - `, version);
 
 app.get("/health-endpoint", (req, res, next) => {
     logClient.log("server-side-health-endpoint", "NOTICE",
-        `The server can be reached: Running version ${process.env.npm_package_version}`, req.params);
+        `The server can be reached: Running version ${process.env.version}`, req.params);
 
     res.send({status: "200"});
 });
