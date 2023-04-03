@@ -9,7 +9,7 @@
     "serve": "npm run build && firebase emulators:start",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "genversion": "npx genversion src/version.js",
+    "genversion": "npx genversion src/version.js && cp src/version.js lib/src",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
