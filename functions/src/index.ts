@@ -38,9 +38,9 @@ logClient.log("cookout-api", "NOTICE",
 
 app.get("/health-endpoint", (req, res, next) => {
     logClient.log("server-side-health-endpoint", "NOTICE",
-        `The server can be reached: Running version ${version}`, req.params);
+        `The server can be reached: Running version ${version} sanityDB ${process.env.SANITY_STUDIO_API_APIDATASET}`, req.params);
 
-    res.send({status: "200", apiVersion: version});
+    res.send({status: "200", apiVersion: version, sanityDB: process.env.SANITY_STUDIO_API_APIDATASET});
 });
 
 app.post("/register-app-user", authController.registerAppUser);
