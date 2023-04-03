@@ -38,9 +38,9 @@ logClient.log("cookout-api", "NOTICE",
 
 app.get("/health-endpoint", (req, res, next) => {
     logClient.log("server-side-health-endpoint", "NOTICE",
-        `The server can be reached: Running version ${process.env.version}`, req.params);
+        `The server can be reached: Running version ${version}`, req.params);
 
-    res.send({status: "200"});
+    res.send({status: "200", apiVersion: version});
 });
 
 app.post("/register-app-user", authController.registerAppUser);
