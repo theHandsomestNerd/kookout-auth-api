@@ -1,0 +1,36 @@
+name: Backup Sanity db
+on:
+  schedule:
+    # Runs at 04:00 UTC on the 1st and 17th of every month
+    - cron: '0 4 */16 * *'
+  workflow_dispatch:
+
+
+jobs:
+  export_upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: | 
+            cd the-handsomest-nerd-authentication
+            yarn
+            set -e
+            # Put your environment variables here. Don't forget
+            # to create secrets for them on GitHub:
+            # https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets
+            cat << EOF > .env.production
+            EOF
+            # Make sure to add a secret for SANITY_AUTH_TOKEN
+            SANITY_AUTH_TOKEN="${{ secrets.SANITY_AUTH_TOKEN }}" yarn sanity dataset export production backups/backup.tar.gz
+      - name: Upload backup.tar.gz
+        uses: actions/upload-artifact@v2
+        with:
+          name: backup-tarball
+          path: backups/backup.tar.gz
+          # Fails the workflow if no files are found; defaults to 'warn'
+          if-no-files-found: error
