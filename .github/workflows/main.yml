@@ -19,7 +19,6 @@ jobs:
         run: | 
             cd the-handsomest-nerd-authentication
             npm install
-            npm install -g @sanity/cli
             set -e
             # Put your environment variables here. Don't forget
             # to create secrets for them on GitHub:
@@ -27,7 +26,7 @@ jobs:
             cat << EOF > .env.production
             EOF
             # Make sure to add a secret for SANITY_AUTH_TOKEN
-            SANITY_AUTH_TOKEN="${{ secrets.SANITY_AUTH_TOKEN }}" yarn sanity dataset export production backups/backup.tar.gz
+            SANITY_AUTH_TOKEN="${{ secrets.SANITY_AUTH_TOKEN }}" npx @sanity/cli dataset export production backups/backup.tar.gz
       - name: Upload backup.tar.gz
         uses: actions/upload-artifact@v2
         with:
