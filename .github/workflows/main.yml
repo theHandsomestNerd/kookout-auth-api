@@ -18,7 +18,8 @@ jobs:
       - name: Install dependencies
         run: | 
             cd the-handsomest-nerd-authentication
-            yarn
+            npm ci && npm install
+            npm install -g @sanity/cli
             set -e
             # Put your environment variables here. Don't forget
             # to create secrets for them on GitHub:
