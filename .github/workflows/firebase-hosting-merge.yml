@@ -15,7 +15,15 @@ jobs:
 
     steps:
       - uses: 'actions/checkout@v3'
-
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: | 
+            cd functions
+            npm install
+            npm run build
       - name: Create SA key
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $HOME/gcloud.json
       - name: Deploy Cloud Functions
