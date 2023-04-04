@@ -524,11 +524,11 @@ const fetchProfileTimelineEventsRef = (referenceId: string): Promise<SanityTimel
 
 const fetchExtendedProfile = (id: string): Promise<SanityExtendedUserProfile[]> => {
     const LOG = "fetch-extended-profile"
-    var extProfileId = "ext-profile-" + id;
+    var extProfileId = id;
 
     return sanityClient
         .fetch(
-            `*[_type == $theType && _id == $extProfileId]{
+            `*[_type == $theType && references($extProfileId)]{
           ${groqQueries.EXT_PROFILE.members}
        }`, {
                 extProfileId,
