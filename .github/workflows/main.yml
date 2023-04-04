@@ -18,7 +18,8 @@ jobs:
       - name: Install dependencies
         run: cd the-handsomest-nerd-authentication && yarn
       - name: Backup Sanity
-        run: |
+        run: | 
+            cd the-handsomest-nerd-authentication
             set -e
             # Put your environment variables here. Don't forget
             # to create secrets for them on GitHub:
