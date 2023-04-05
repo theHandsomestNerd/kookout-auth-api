@@ -4,6 +4,7 @@ import * as cors from "cors";
 import * as logClient from "./logClient";
 import chatController from "./chatController";
 import authController from "./authController";
+import bugReportController from "./bugReportController";
 const version = require('./version.js');
 
 const app = express();
@@ -78,6 +79,7 @@ app.get("/get-timeline-events", chatController.getTimelineEvents);
 // app.post("/delete-my-album", chatController.updateCreateExtendedProfile);
 // app.post("/get-album/:id", chatController.updateCreateExtendedProfile);
 // app.post("/get-albums/:userId", chatController.updateCreateExtendedProfile);
+app.post("/submit-bug-report", bugReportController.submitBugReport);
 
 app.post("/create-post", chatController.createPost);
 // app.post("/delete-post", chatController.updateCreateExtendedProfile);
