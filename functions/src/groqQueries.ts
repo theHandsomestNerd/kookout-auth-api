@@ -93,6 +93,16 @@ const POST = {
 `,
     type: "Post"
 }
+const BUG_REPORT = {
+    members: `
+          _id,
+          submittedBy->,
+          publishedAt,
+          body,
+          title
+`,
+    type: "BugReport"
+}
 const TIMELINE_EVENT = {
     members: `
           _id,
@@ -105,4 +115,4 @@ const TIMELINE_EVENT = {
     type: "TimelineEvent"
 }
 
-export default {EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW, BLOCK, TIMELINE_EVENT, POST}
+export default {BUG_REPORT, EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW, BLOCK, TIMELINE_EVENT, POST}

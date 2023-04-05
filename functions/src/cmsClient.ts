@@ -400,6 +400,58 @@ const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string
 
 
 }
+const uploadBugReport = async (filePath?: any, userId?: string, title?: string, description?: string, uiVersion?:string, apiVersion?:string, uiSanityDB?:string, apiSanityDB?:string): Promise<SanityPostRef> => {
+    const LOG_COMPONENT = "upload-bug-report-image-" + userId
+
+    var imageAsset
+
+        var slug = cmsUtils.convertToSlugStr(title ?? "");
+    if (filePath != null) {
+        imageAsset = await sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
+            {filename: `${slug}-bug-report`})
+
+
+        log(LOG_COMPONENT, "NOTICE", "The bug report Image Asset uploaded", {imageAsset})
+
+    }
+    log(LOG_COMPONENT, "NOTICE", "The title and body", {title, description})
+
+    var newSanityDocument: any = {
+        _type: groqQueries.BUG_REPORT.type,
+        body:description,
+        title, uiVersion, apiVersion, uiSanityDB, apiSanityDB,
+        slug: cmsUtils.convertToSlugObj(slug ??""),
+        publishedAt: new Date(Date.now()),
+    }
+
+    if (userId && userId != "") {
+        newSanityDocument = {
+            ...newSanityDocument, submittedBy: cmsUtils.getSanityDocumentRef(userId ?? ""),
+        }
+    }
+
+    if (imageAsset != null && imageAsset._id != null) {
+        newSanityDocument = {
+            ...newSanityDocument,
+            mainImage: {
+                _type: "image",
+                asset: {
+                    _type: "reference",
+                    _ref: imageAsset._id
+                }
+            },
+        } as any;
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Bug Report", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create bug report", {userId, title, description})
+        return e
+    })
+
+
+}
 
 const changeDisplayName = (displayName: string, firebaseUid: string) => {
     const LOG = `change-displayname-${firebaseUid}`;
@@ -505,8 +557,8 @@ const fetchProfileTimelineEventsRef = (referenceId: string): Promise<SanityTimel
 
     return sanityClient
         .delete({
-                query: `*[_type == '${groqQueries.TIMELINE_EVENT.type}' && references('${referenceId}')][0...999]`
-            }).then((data: any) => {
+            query: `*[_type == '${groqQueries.TIMELINE_EVENT.type}' && references('${referenceId}')][0...999]`
+        }).then((data: any) => {
             log(LOG, "NOTICE", "The timeline event refs raw", data)
 
             if (!data) {
@@ -627,6 +679,7 @@ export default {
     createUser,
     uploadUserProfileImage,
     uploadUserPost,
+    uploadBugReport,
     changeDisplayName,
     fetchUser,
     fetchAllUsers,

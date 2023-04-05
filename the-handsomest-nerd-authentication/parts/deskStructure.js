@@ -14,6 +14,9 @@ export default () =>
                 .title('User')
                 .child(createSuperPane('user', S)),
             S.listItem()
+                .title('Bug Report')
+                .child(createSuperPane('BugReport', S)),
+            S.listItem()
                 .title('Extended Profile')
                 .child(createSuperPane('ExtendedProfile', S)),
             S.listItem()

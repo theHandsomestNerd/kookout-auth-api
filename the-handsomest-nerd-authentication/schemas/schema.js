@@ -15,6 +15,7 @@ import TimelineEvent from "./timelineEvent";
 import Block from "./block";
 import PhotoAlbum from "./photoAlbum";
 import AlbumImage from "./albumImage";
+import BugReport from "./bug-report/bugReport";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -35,6 +36,7 @@ export default createSchema({
       Post,
       PhotoAlbum,
       AlbumImage,
+      BugReport,
       firebaseTwitterProvider
   ]),
 })
