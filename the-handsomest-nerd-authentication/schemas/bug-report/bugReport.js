@@ -70,6 +70,11 @@ export default {
             title: 'API Sanity DB env',
             type: 'string',
         },
+    {
+            name: 'isFixed',
+            title: 'is Fixed?',
+            type: 'boolean',
+        },
     ],
 
     preview: {

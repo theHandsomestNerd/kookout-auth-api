@@ -74,6 +74,38 @@ const getAllProfiles = async (req: any, res: any) => {
 
 }
 
+const getAllProfilesPaginated = async (req: any, res: any) => {
+    var {lastId, pageSize} = req.params;
+    const LOG_COMPONENT = 'get-all-profiles-paginated';
+    logClient.log(LOG_COMPONENT, "DEBUG",
+        "Getting All Profiles - paginated");
+
+    const headers = req.headers;
+
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const thisUserPaginated = await cmsService.fetchAllUsersPaginated(whoami.uid, lastId, pageSize);
+
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
+                "num GET all profiles paginated RESULTS", thisUserPaginated.length);
+            var lastId;
+            if (thisUserPaginated.length > 0) {
+                lastId = thisUserPaginated[thisUserPaginated.length - 1]._id
+            } else {
+                lastId = null // Reached the end
+            }
+
+            return res.send({profiles: [...thisUserPaginated], lastId});
+        }
+    }
+
+
+}
+
 
 const getProfileById = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -780,5 +812,6 @@ export default {
     getAllPosts,
     // getProfileBlocks,
     getMyProfileBlocks,
-    getTimelineEvents
+    getTimelineEvents,
+    getAllProfilesPaginated
 }
