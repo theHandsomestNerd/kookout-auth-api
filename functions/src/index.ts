@@ -53,6 +53,7 @@ app.get("/get-my-profile", chatController.getMyProfile);
 app.get("/get-ext-profile/:id", chatController.getExtendedProfile);
 app.post("/update-create-ext-profile", chatController.updateCreateExtendedProfile);
 app.get("/get-all-profiles", chatController.getAllProfiles);
+app.get("/get-all-profiles-paginated", chatController.getAllProfilesPaginated);
 
 app.post("/like-profile", chatController.likeProfile);
 app.post("/unlike-profile", chatController.unlikeProfile);

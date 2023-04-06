@@ -55,6 +55,15 @@ const fetchAllUsers = async (userId: string) => {
 
     return cmsClient.fetchAllUsers(blockedUserIds);
 }
+const fetchAllUsersPaginated = async (userId: string, lastId: string, pageSize: number) => {
+    var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
+
+    var blockedUserIds = blockedUsers?.map((blockedUser) => {
+        return blockedUser.blocked._id
+    });
+
+    return cmsClient.fetchAllUsersPaginated(pageSize, lastId, blockedUserIds);
+}
 const fetchProfileTimelineEvents = async (userId: string) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
 
@@ -105,5 +114,6 @@ export default {
     removeFollow,
     createProfileComment,
     createProfileFollow,
-    fetchAllUsers
+    fetchAllUsers,
+    fetchAllUsersPaginated
 }

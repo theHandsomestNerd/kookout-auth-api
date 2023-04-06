@@ -400,12 +400,12 @@ const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string
 
 
 }
-const uploadBugReport = async (filePath?: any, userId?: string, title?: string, description?: string, uiVersion?:string, apiVersion?:string, uiSanityDB?:string, apiSanityDB?:string): Promise<SanityPostRef> => {
+const uploadBugReport = async (filePath?: any, userId?: string, title?: string, description?: string, uiVersion?: string, apiVersion?: string, uiSanityDB?: string, apiSanityDB?: string): Promise<SanityPostRef> => {
     const LOG_COMPONENT = "upload-bug-report-image-" + userId
 
     var imageAsset
 
-        var slug = cmsUtils.convertToSlugStr(title ?? "");
+    var slug = cmsUtils.convertToSlugStr(title ?? "");
     if (filePath != null) {
         imageAsset = await sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
             {filename: `${slug}-bug-report`})
@@ -418,9 +418,9 @@ const uploadBugReport = async (filePath?: any, userId?: string, title?: string, 
 
     var newSanityDocument: any = {
         _type: groqQueries.BUG_REPORT.type,
-        body:description,
+        body: description,
         title, uiVersion, apiVersion, uiSanityDB, apiSanityDB,
-        slug: cmsUtils.convertToSlugObj(slug ??""),
+        slug: cmsUtils.convertToSlugObj(slug ?? ""),
         publishedAt: new Date(Date.now()),
     }
 
@@ -504,6 +504,50 @@ const fetchAllUsers = (blockedIds?: string[]): Promise<SanityUser[]> => {
             const error = "Error retrieving Users"
             log(LOG, "ERROR", error, {error: e})
             // console.log(Error(`Error retrieving Users Error: - ` + e.toString()))
+            return Promise.resolve([]);
+        })
+}
+const fetchAllUsersPaginated = (pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityUser[]> => {
+    const LOG = `fetch-users-paginated-start-at${theLastId}`
+
+    var lastId:(string | null) = theLastId ?? null;
+    var queryString = "_type == $thisType && _id > $lastId";
+    var queryParams: any = {
+        thisType: groqQueries.USER.type,
+        pageSize: pageSize,
+    }
+
+    if (lastId === null || lastId == undefined) {
+        return Promise.resolve([]);
+    }
+    queryParams = {...queryParams, lastId}
+
+    if (blockedIds && blockedIds.length > 0) {
+        log(LOG, "DEBUG", "I have blocked these users", blockedIds)
+        queryParams = {...queryParams, blockedIds: blockedIds}
+        queryString += " && !(userId in $blockedIds)"
+    }
+
+    log(LOG, "DEBUG", `All users Query paginated starting at ${lastId}:`, {queryString, queryParams})
+
+
+
+    return sanityClient
+        .fetch(
+            `*[${queryString}][0...$pageSize]{
+          ${groqQueries.USER.members}
+       }`, queryParams
+        ).then((data: SanityUser[]) => {
+            // log(LOG, "NOTICE", "The users raw", data)
+
+            if (!data) {
+                console.log(Error(`Error retrieving paginated users: page=${pageSize} lastId=${lastId} `))
+            }
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving paginated Users"
+            log(LOG, "ERROR", error, {error: e})
             return Promise.resolve([]);
         })
 }
@@ -683,6 +727,7 @@ export default {
     changeDisplayName,
     fetchUser,
     fetchAllUsers,
+    fetchAllUsersPaginated,
     createProfileLike,
     fetchProfileLike,
     createProfileBlock,
