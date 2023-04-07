@@ -550,6 +550,49 @@ const fetchAllUsersPaginated = (pageSize: number, theLastId?: string, blockedIds
             return Promise.resolve([]);
         })
 }
+const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityPost[]> => {
+    const LOG = `fetch-posts-paginated-start-at-${theLastId}-${pageSize}`
+
+    var lastId: (string | null) = theLastId ?? null
+    var queryString = "_type == $thisType"
+    var queryParams: any = {
+        thisType: groqQueries.POST.type,
+        // pageSize: pageSize,
+    }
+
+    if (lastId != null && lastId != "") {
+        queryString += " && _id > $lastId"
+        queryParams = {...queryParams, lastId}
+    }
+
+    if (blockedIds && blockedIds.length > 0) {
+        log(LOG, "DEBUG", "I have blocked these users", blockedIds)
+        queryParams = {...queryParams, blockedIds: blockedIds}
+        queryString += " && !(userId in $blockedIds)"
+    }
+
+    log(LOG, "DEBUG", `All posts Query paginated starting at ${lastId}:`, {queryString, queryParams})
+
+
+    return sanityClient
+        .fetch(
+            `*[${queryString}][0...${pageSize}]{
+          ${groqQueries.POST.members}
+       }`, {...queryParams}
+        ).then((data: SanityPost[]) => {
+            // log(LOG, "NOTICE", "The users raw", data)
+
+            if (!data) {
+                console.log(Error(`Error retrieving paginated posts: page=${pageSize} lastId=${lastId} `))
+            }
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving paginated Posts"
+            log(LOG, "ERROR", error, {error: e})
+            return Promise.resolve([]);
+        })
+}
 const fetchProfileTimelineEvents = (userId: string, blockedIds?: string[]): Promise<SanityTimelineEvent[]> => {
     const LOG = "fetch-profile-timeline-events-" + userId
 
@@ -727,6 +770,7 @@ export default {
     fetchUser,
     fetchAllUsers,
     fetchAllUsersPaginated,
+    fetchAllPostsPaginated,
     createProfileLike,
     fetchProfileLike,
     createProfileBlock,
