@@ -37,9 +37,9 @@ const getExtendedProfile = async (req: any, res: any) => {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "Ext Profile Resp:", response);
 
-            if(extProfile.length == 0 ){
-            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
-                "Delivering 400:", response);
+            if (extProfile.length == 0) {
+                logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
+                    "Delivering 400:", response);
                 return res.status(200).send({noExtendedProfile: "No Ext profile", userId: whoami.uid});
             }
 
@@ -76,7 +76,7 @@ const getAllProfiles = async (req: any, res: any) => {
 
 const getAllProfilesPaginated = async (req: any, res: any) => {
     var {lastId, pageSize} = req.params;
-    const LOG_COMPONENT = 'get-all-profiles-paginated';
+    const LOG_COMPONENT = `get-all-profiles-paginated-${lastId}-${pageSize}`;
     logClient.log(LOG_COMPONENT, "DEBUG",
         "Getting All Profiles - paginated");
 
@@ -88,18 +88,18 @@ const getAllProfilesPaginated = async (req: any, res: any) => {
         if (!whoami.uid) {
             return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const thisUserPaginated = await cmsService.fetchAllUsersPaginated(whoami.uid, lastId, pageSize);
+            const thisUserPaginated = await cmsService.fetchAllUsersPaginated(whoami.uid,  pageSize, lastId,);
 
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "num GET all profiles paginated RESULTS", thisUserPaginated.length);
-            var lastId;
+            var nextLastId;
             if (thisUserPaginated.length > 0) {
-                lastId = thisUserPaginated[thisUserPaginated.length - 1]._id
+                nextLastId = thisUserPaginated[thisUserPaginated.length - 1]._id
             } else {
-                lastId = null // Reached the end
+                nextLastId = null // Reached the end
             }
 
-            return res.send({profiles: [...thisUserPaginated], lastId});
+            return res.send({profiles: [...thisUserPaginated], lastId: nextLastId});
         }
     }
 
@@ -670,12 +670,12 @@ const getAllPosts = async (req: any, res: any) => {
             const profilePosts = await cmsService.fetchPosts(whoami.uid);
 
             logClient.log(LOG_COMPONENT, "NOTICE",
-                "Posts", profilePosts);
+                "Posts", profilePosts?.length);
 
             return res.status(200).send({posts: profilePosts});
         }
     }
-    return res.status(401).send({message: "NOt authorized", posts:[]});
+    return res.status(401).send({message: "NOt authorized", posts: []});
 }
 
 const commentProfile = async (req: any, res: any) => {
@@ -772,8 +772,8 @@ const createPost = async (req: any, res: any) => {
         // }
 
         // if (imageToBeUploaded && (imageToBeUploaded as any).filepath) {
-            // upload to sanity
-            createPostResp = await cmsService.createPost(imageToBeUploaded, user.uid, postBody)
+        // upload to sanity
+        createPostResp = await cmsService.createPost(imageToBeUploaded, user.uid, postBody)
 
         // }
 
