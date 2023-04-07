@@ -320,7 +320,7 @@ const fetchPosts = (blockedIds?: string[]): Promise<SanityPost[] | undefined> =>
        }`,
             queryParams
         ).then((data: SanityPost[]) => {
-            log(LOG, "NOTICE", "The raw Posts", data)
+            log(LOG, "NOTICE", "The raw Posts", data.length)
 
             return data
         }).catch((e: any) => {
@@ -508,19 +508,19 @@ const fetchAllUsers = (blockedIds?: string[]): Promise<SanityUser[]> => {
         })
 }
 const fetchAllUsersPaginated = (pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityUser[]> => {
-    const LOG = `fetch-users-paginated-start-at${theLastId}`
+    const LOG = `fetch-users-paginated-start-at-${theLastId}-${pageSize}`
 
-    var lastId:(string | null) = theLastId ?? null;
-    var queryString = "_type == $thisType && _id > $lastId";
+    var lastId: (string | null) = theLastId ?? null
+    var queryString = "_type == $thisType"
     var queryParams: any = {
         thisType: groqQueries.USER.type,
-        pageSize: pageSize,
+        // pageSize: pageSize,
     }
 
-    if (lastId === null || lastId == undefined) {
-        return Promise.resolve([]);
+    if (lastId != null && lastId != "") {
+        queryString += " && _id > $lastId"
+        queryParams = {...queryParams, lastId}
     }
-    queryParams = {...queryParams, lastId}
 
     if (blockedIds && blockedIds.length > 0) {
         log(LOG, "DEBUG", "I have blocked these users", blockedIds)
@@ -531,12 +531,11 @@ const fetchAllUsersPaginated = (pageSize: number, theLastId?: string, blockedIds
     log(LOG, "DEBUG", `All users Query paginated starting at ${lastId}:`, {queryString, queryParams})
 
 
-
     return sanityClient
         .fetch(
-            `*[${queryString}][0...$pageSize]{
+            `*[${queryString}][0...${pageSize}]{
           ${groqQueries.USER.members}
-       }`, queryParams
+       }`, {...queryParams}
         ).then((data: SanityUser[]) => {
             // log(LOG, "NOTICE", "The users raw", data)
 

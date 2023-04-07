@@ -55,7 +55,7 @@ const fetchAllUsers = async (userId: string) => {
 
     return cmsClient.fetchAllUsers(blockedUserIds);
 }
-const fetchAllUsersPaginated = async (userId: string, lastId: string, pageSize: number) => {
+const fetchAllUsersPaginated = async (userId: string, pageSize: number, lastId?: string, ) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
 
     var blockedUserIds = blockedUsers?.map((blockedUser) => {
