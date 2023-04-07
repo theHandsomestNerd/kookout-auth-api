@@ -87,5 +87,7 @@ app.post("/create-post", chatController.createPost);
 // app.post("/delete-post", chatController.updateCreateExtendedProfile);
 // app.post("/get-post/:id", chatController.updateCreateExtendedProfile);
 app.get("/get-all-posts", chatController.getAllPosts);
+app.get("/get-all-posts-paginated/:pageSize/:lastId", chatController.getAllPostsPaginated);
+app.get("/get-all-posts-paginated/:pageSize", chatController.getAllPostsPaginated);
 
 exports.app = functions.https.onRequest(app);

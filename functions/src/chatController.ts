@@ -105,6 +105,37 @@ const getAllProfilesPaginated = async (req: any, res: any) => {
 
 
 }
+const getAllPostsPaginated = async (req: any, res: any) => {
+    var {lastId, pageSize} = req.params;
+    const LOG_COMPONENT = `get-all-posts-paginated-${lastId}-${pageSize}`;
+    logClient.log(LOG_COMPONENT, "DEBUG",
+        "Getting All Posts - paginated");
+
+    const headers = req.headers;
+
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const thePageOfPostsFromDb = await cmsService.fetchAllPostsPaginated(whoami.uid,  pageSize, lastId,);
+
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
+                "num GET all posts paginated RESULTS", thePageOfPostsFromDb.length);
+            var nextLastId;
+            if (thePageOfPostsFromDb.length > 0) {
+                nextLastId = thePageOfPostsFromDb[thePageOfPostsFromDb.length - 1]._id
+            } else {
+                nextLastId = null // Reached the end
+            }
+
+            return res.send({posts: [...thePageOfPostsFromDb], lastId: nextLastId});
+        }
+    }
+
+
+}
 
 
 const getProfileById = async (req: any, res: any) => {
@@ -796,6 +827,7 @@ export default {
     getMyProfile,
     getExtendedProfile,
     updateCreateExtendedProfile,
+    getAllPostsPaginated,
     getAllProfiles,
     getProfileById,
     likeProfile,
