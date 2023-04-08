@@ -132,4 +132,4 @@ const removeFollow = async (alreadyRemovedFollow:SanityFollow)=>{
         return e
     })
 }
-export default {removeFollow, postCreated, profileLikeCreated, removeLike, profileCommentCreated, profileFollowCreated}
+export default {removeFollow, postCreated, likeCreated: profileLikeCreated, removeLike, profileCommentCreated, profileFollowCreated}

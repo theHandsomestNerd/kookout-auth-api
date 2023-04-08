@@ -1,10 +1,11 @@
 import cmsClient from "./cmsClient";
 import timelineClient from "./timelineClient";
+import LIKE_CATEGORY_ENUM from "./LikeCategoryEnum";
 
 
-const createProfileLike = async (likerUserId: string, likeeUserId: string) => {
-    var createdLike = await cmsClient.createProfileLike(likerUserId, likeeUserId);
-    await timelineClient.profileLikeCreated(createdLike);
+const createLike = async (likerUserId: string, likeeId: string, likeType: LIKE_CATEGORY_ENUM) => {
+    var createdLike = await cmsClient.createLike(likerUserId, likeeId, likeType);
+    await timelineClient.likeCreated(createdLike);
     return createdLike;
 }
 
@@ -55,7 +56,7 @@ const fetchAllUsers = async (userId: string) => {
 
     return cmsClient.fetchAllUsers(blockedUserIds);
 }
-const fetchAllUsersPaginated = async (userId: string, pageSize: number, lastId?: string, ) => {
+const fetchAllUsersPaginated = async (userId: string, pageSize: number, lastId?: string,) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
 
     var blockedUserIds = blockedUsers?.map((blockedUser) => {
@@ -64,7 +65,7 @@ const fetchAllUsersPaginated = async (userId: string, pageSize: number, lastId?:
 
     return cmsClient.fetchAllUsersPaginated(pageSize, lastId, blockedUserIds);
 }
-const fetchAllPostsPaginated = async (userId: string, pageSize: number, lastId?: string, ) => {
+const fetchAllPostsPaginated = async (userId: string, pageSize: number, lastId?: string,) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
 
     var blockedUserIds = blockedUsers?.map((blockedUser) => {
@@ -118,7 +119,7 @@ export default {
     createPost,
     fetchProfileComments,
     fetchProfileTimelineEvents,
-    createProfileLike,
+    createLike,
     removeLike,
     removeFollow,
     createProfileComment,
