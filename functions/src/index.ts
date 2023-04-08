@@ -56,8 +56,8 @@ app.get("/get-all-profiles", chatController.getAllProfiles);
 app.get("/get-all-profiles-paginated/:pageSize/:lastId", chatController.getAllProfilesPaginated);
 app.get("/get-all-profiles-paginated/:pageSize", chatController.getAllProfilesPaginated);
 
-app.post("/like-profile", chatController.likeProfile);
-app.post("/unlike-profile", chatController.unlikeProfile);
+app.post("/like", chatController.like);
+app.post("/unlike", chatController.unlike);
 app.get("/get-profile-likes/:id", chatController.getProfileLikes);
 
 app.post("/comment-profile", chatController.commentProfile);

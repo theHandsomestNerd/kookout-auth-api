@@ -17,6 +17,7 @@ import {
 } from "../types";
 import groqQueries from "./groqQueries";
 import cmsUtils from "./cmsUtils";
+import LIKE_CATEGORY_ENUM from "./LikeCategoryEnum";
 
 const createUser = async (email: string, userId: string, provider: any) => {
     const LOG_COMPONENT = "create-user-" + userId
@@ -38,24 +39,21 @@ const createUser = async (email: string, userId: string, provider: any) => {
     })
 }
 
-enum LIKE_CATEGORY_ENUM {
-    PROFILE_LIKE = 'profile-like'
-}
 
-const createProfileLike = async (likerUserId: string, likeeUserId: string): Promise<SanityLikeRef> => {
-    const LOG_COMPONENT = "create-profile-like-profile-" + likeeUserId + "-like-" + likeeUserId
+const createLike = async (likerUserId: string, likeeId: string, likeType:LIKE_CATEGORY_ENUM): Promise<SanityLikeRef> => {
+    const LOG_COMPONENT = "create-profile-like-profile-" + likerUserId + "-like-" + likeeId
 
     const newSanityDocument = {
         _type: groqQueries.LIKE.type,
         liker: cmsUtils.getSanityDocumentRef(likerUserId),
-        likee: cmsUtils.getSanityDocumentRef(likeeUserId),
-        likeCategory: LIKE_CATEGORY_ENUM.PROFILE_LIKE
+        likee: cmsUtils.getSanityDocumentRef(likeeId),
+        likeCategory: likeType
     }
 
     log(LOG_COMPONENT, "INFO", "Creating Like", newSanityDocument)
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
-        log(LOG_COMPONENT, "ERROR", "could not create like", {likerUserId, likeeUserId, e})
+        log(LOG_COMPONENT, "ERROR", "could not create like", {likerUserId, likeeUserId: likeeId, e})
         return e
     })
 }
@@ -92,7 +90,7 @@ const createProfileFollow = async (followerUserId: string, followedUserId: strin
     })
 }
 const removeLike = async (likeId: string) => {
-    const LOG_COMPONENT = "remove-like-profile-" + likeId;
+    const LOG_COMPONENT = "remove-like-" + likeId;
 
     log(LOG_COMPONENT, "INFO", "Removing Like", likeId)
 
@@ -172,7 +170,7 @@ const fetchProfileLikes = (userId: string): Promise<SanityLike[] | undefined> =>
        }`,
             {userId, thisType: groqQueries.LIKE.type}
         ).then((data: SanityLike[]) => {
-            log(LOG, "NOTICE", "The raw Like", data)
+            log(LOG, "NOTICE", "The raw Likes", data.length)
 
             return data
         }).catch((e: any) => {
@@ -771,7 +769,7 @@ export default {
     fetchAllUsers,
     fetchAllUsersPaginated,
     fetchAllPostsPaginated,
-    createProfileLike,
+    createLike: createLike,
     fetchProfileLike,
     createProfileBlock,
     fetchProfileLikes,

@@ -8,6 +8,7 @@ import cmsUtils from "./cmsUtils";
 import * as path from "path";
 import * as os from "os";
 import * as fs from "fs";
+import LIKE_CATEGORY_ENUM from "./LikeCategoryEnum";
 
 const getExtendedProfile = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -330,22 +331,38 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
 }
 
 
-const likeProfile = async (req: any, res: any) => {
+const like = async (req: any, res: any) => {
 
     const headers = req.headers;
 
-    const {userId} = req.body;
-    const LOG_COMPONENT = "like-profile-" + userId
+    const {likeeId, likeType} = req.body;
+    const LOG_COMPONENT = `like-${likeType}-${likeeId}`
 
     logClient.log(LOG_COMPONENT, "NOTICE",
-        "request to like profile", userId);
+        `request to like ${likeType}`, likeeId);
 
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
         logClient.log(LOG_COMPONENT, "NOTICE",
-            "request to like profile by", whoami);
+            `request to like ${likeType} by`, whoami);
 
-        const likeStatus = await cmsService.createProfileLike(whoami.uid, userId)
+        var processedLikeType;
+        switch (likeType) {
+            case 'profile-like':
+                processedLikeType = LIKE_CATEGORY_ENUM.PROFILE_LIKE;
+                break;
+            case 'comment-like':
+                processedLikeType = LIKE_CATEGORY_ENUM.COMMENT_LIKE;
+                break;
+            case 'post-like':
+                processedLikeType = LIKE_CATEGORY_ENUM.POST_LIKE;
+                break;
+            default:
+                processedLikeType = LIKE_CATEGORY_ENUM.PROFILE_LIKE;
+                break;
+        }
+
+        const likeStatus = await cmsService.createLike(whoami.uid, likeeId, processedLikeType)
         if (likeStatus._id) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "created a Sanity Like", {likeStatus: "SUCCESS"});
@@ -424,30 +441,31 @@ const followProfile = async (req: any, res: any) => {
 
     return res.status(401).json({followStatus: "ERROR", body: "UNAUTHORIZED"});
 }
-const unlikeProfile = async (req: any, res: any) => {
+const unlike = async (req: any, res: any) => {
 
     const headers = req.headers;
 
-    const {likeId} = req.body;
-    const LOG_COMPONENT = "unlike-profile-likeid-" + likeId
+    const {likeId, likeType} = req.body;
+    const LOG_COMPONENT = `unlike-${likeType}-likeid-${likeId}`
 
     logClient.log(LOG_COMPONENT, "NOTICE",
         "request to unlike profile ", likeId);
 
+
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
-        logClient.log(LOG_COMPONENT, "NOTICE",
-            "request to unlike profile by ", whoami);
+        logClient.log(LOG_COMPONENT, "DEBUG",
+            `request to unlike ${likeType} by `, whoami);
 
         const likeStatus = await cmsService.removeLike(likeId);
         if (likeStatus.transactionId) {
-            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "deleted a Sanity Like", {unlikeStatus: "SUCCESS"});
 
             return res.status(200).json({unlikeStatus: "SUCCESS", body: likeStatus});
         } else {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
-                "error creating like", {unlikeStatus: "ERROR", message: likeStatus});
+                "error deleting like", {unlikeStatus: "ERROR", message: likeStatus});
 
             return res.status(400).json({unlikeStatus: "ERROR", body: likeStatus});
         }
@@ -830,10 +848,10 @@ export default {
     getAllPostsPaginated,
     getAllProfiles,
     getProfileById,
-    likeProfile,
+    like,
     blockProfile,
     getProfileLikes,
-    unlikeProfile,
+    unlike,
     unblockProfile,
     commentProfile,
     createPost,
