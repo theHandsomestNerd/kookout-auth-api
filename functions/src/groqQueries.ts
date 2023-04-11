@@ -83,6 +83,16 @@ const COMMENT = {
 `,
     type: "Comment"
 }
+const POST_COMMENT = {
+    members: `
+          _id,
+          author->,
+          recipient->,
+          publishedAt,
+          body,
+`,
+    type: "PostComment"
+}
 const POST = {
     members: `
           _id,
@@ -114,5 +124,13 @@ const TIMELINE_EVENT = {
 `,
     type: "TimelineEvent"
 }
+const COMMENT_THREAD = {
+    members: `
+          _id,
+          source->,
+          "theComments": theComments[]->,
+`,
+    type: "CommentThread"
+}
 
-export default {BUG_REPORT, EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW, BLOCK, TIMELINE_EVENT, POST}
+export default {POST_COMMENT, COMMENT_THREAD, BUG_REPORT, EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW, BLOCK, TIMELINE_EVENT, POST}

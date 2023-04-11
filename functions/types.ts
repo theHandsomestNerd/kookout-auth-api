@@ -148,6 +148,14 @@ export type SanityComment = {
     publishedAt: Date,
     body: string,
 }
+export type SanityPostComment = {
+    _id: string,
+    author: SanityUser,
+    recipient: SanityPost,
+
+    publishedAt: Date,
+    body: string,
+}
 export type SanityCommentRef = {
     _id: string,
     author: Reference,

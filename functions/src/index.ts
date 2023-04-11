@@ -60,7 +60,6 @@ app.post("/like", chatController.like);
 app.post("/unlike", chatController.unlike);
 app.get("/get-profile-likes/:id", chatController.getProfileLikes);
 
-app.post("/comment-profile", chatController.commentProfile);
 // app.post("/uncomment-profile", chatController.commentProfile);
 app.get("/get-profile-comments/:id", chatController.getProfileComments);
 
@@ -85,9 +84,13 @@ app.post("/submit-bug-report", bugReportController.submitBugReport);
 
 app.post("/create-post", chatController.createPost);
 // app.post("/delete-post", chatController.updateCreateExtendedProfile);
-// app.post("/get-post/:id", chatController.updateCreateExtendedProfile);
+app.get("/get-post/:id", chatController.getPostById);
 app.get("/get-all-posts", chatController.getAllPosts);
 app.get("/get-all-posts-paginated/:pageSize/:lastId", chatController.getAllPostsPaginated);
 app.get("/get-all-posts-paginated/:pageSize", chatController.getAllPostsPaginated);
+
+app.post("/comment-profile", chatController.commentProfile);
+app.get("/get-comment-thread-paginated/:documentId/:pageSize/:lastId", chatController.getCommentThreadPaginated);
+app.get("/get-comment-thread-paginated/:documentId/:pageSize", chatController.getCommentThreadPaginated);
 
 exports.app = functions.https.onRequest(app);

@@ -1,7 +1,7 @@
 {
   "name": "the-handsomest-nerd-authentication",
   "private": true,
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.11",
   "description": "",
   "main": "package.json",
   "author": "James Singleton <hello@thehandsomestnerd.com>",

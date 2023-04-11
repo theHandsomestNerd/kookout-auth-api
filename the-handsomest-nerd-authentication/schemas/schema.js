@@ -16,6 +16,8 @@ import Block from "./block";
 import PhotoAlbum from "./photoAlbum";
 import AlbumImage from "./albumImage";
 import BugReport from "./bug-report/bugReport";
+import CommentThread from "./commentThread";
+import PostComment from "./postComment";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -37,6 +39,8 @@ export default createSchema({
       PhotoAlbum,
       AlbumImage,
       BugReport,
-      firebaseTwitterProvider
+      firebaseTwitterProvider,
+      CommentThread,
+      PostComment,
   ]),
 })

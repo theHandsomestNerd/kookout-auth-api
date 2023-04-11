@@ -11,7 +11,7 @@ import {
     SanityExtendedUserProfileRef,
     SanityFollow,
     SanityLike,
-    SanityLikeRef, SanityPost, SanityPostRef,
+    SanityLikeRef, SanityPost, SanityPostComment, SanityPostRef,
     SanityTimelineEvent,
     SanityUser
 } from "../types";
@@ -156,6 +156,30 @@ const fetchUser = (userId: string): Promise<SanityUser | undefined> => {
             const error = "Error retrieving User"
             log(LOG, "ERROR", error, {error: e})
             console.log(Error(`Error retrieving User Error: ${userId} - ` + e.toString()))
+            return Promise.resolve(undefined);
+        })
+}
+const fetchPost = (postId: string): Promise<SanityPost | undefined> => {
+    const LOG = "fetch-post" + postId
+
+    return sanityClient
+        .fetch(
+            `*[_type == $thisType && _id == $postId]{
+          ${groqQueries.POST.members}
+       }`,
+            {postId, thisType: groqQueries.POST.type}
+        ).then((data: SanityPost[]) => {
+            log(LOG, "NOTICE", "The post raw", data)
+
+            if (!data[0]) {
+                console.log(Error(`Error retrieving post no post returned for ${postId}: `))
+            }
+
+            return data[0]
+        }).catch((e: any) => {
+            const error = "Error retrieving post"
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving post Error: ${postId} - ` + e.toString()))
             return Promise.resolve(undefined);
         })
 }
@@ -591,6 +615,50 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
             return Promise.resolve([]);
         })
 }
+const fetchPostCommentsPaginated = (documentId:string, pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityPostComment[]> => {
+    const LOG = `fetch-post-${documentId}-comments-paginated-start-at-${theLastId}-${pageSize}`
+
+    var lastId: (string | null) = theLastId ?? null
+    var queryString = "_type == $thisType && references($documentId)"
+    var queryParams: any = {
+        thisType: groqQueries.POST_COMMENT.type,
+        documentId: documentId
+        // pageSize: pageSize,
+    }
+
+    if (lastId != null && lastId != "") {
+        queryString += " && _id > $lastId"
+        queryParams = {...queryParams, lastId}
+    }
+
+    if (blockedIds && blockedIds.length > 0) {
+        log(LOG, "DEBUG", "I have blocked these users", blockedIds)
+        queryParams = {...queryParams, blockedIds: blockedIds}
+        queryString += " && !(userId in $blockedIds)"
+    }
+
+    log(LOG, "DEBUG", `post comments paginated Query paginated starting at ${lastId}:`, {queryString, queryParams})
+
+
+    return sanityClient
+        .fetch(
+            `*[${queryString}][0...${pageSize}]|order(publishedAt){
+          ${groqQueries.POST_COMMENT.members}
+       }`, {...queryParams}
+        ).then((data: SanityPostComment[]) => {
+            // log(LOG, "NOTICE", "The users raw", data)
+
+            if (!data) {
+                console.log(Error(`Error retrieving paginated post:${documentId} comments: page=${pageSize} lastId=${lastId} `))
+            }
+
+            return data
+        }).catch((e: any) => {
+            const error = `Error retrieving paginated ${documentId} Post comments: page=${pageSize} lastId=${lastId} `
+            log(LOG, "ERROR", error, {error: e})
+            return Promise.resolve([]);
+        })
+}
 const fetchProfileTimelineEvents = (userId: string, blockedIds?: string[]): Promise<SanityTimelineEvent[]> => {
     const LOG = "fetch-profile-timeline-events-" + userId
 
@@ -757,7 +825,43 @@ const createProfileComment = async (commenterUserId: string, profileUserId: stri
         return e
     })
 }
+const createPostComment = async (commenterUserId: string, profileUserId: string,commentBody: string) => {
+    const LOG_COMPONENT = "create-post-comment-profile-" + profileUserId + "-comment-by-" + commenterUserId
+
+    const newSanityDocument = {
+        _type: groqQueries.POST_COMMENT.type,
+        author: cmsUtils.getSanityDocumentRef(commenterUserId),
+        recipient: cmsUtils.getSanityDocumentRef(profileUserId),
+        publishedAt: new Date(Date.now()),
+        body: commentBody
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Post COmment", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create post comment", {commenterUserId, profileUserId, commentBody, e})
+        return e
+    })
+}
+
+const createCommentThread = async (postId: string,) => {
+    const LOG_COMPONENT = "create-comment-thread-";
+
+    const newSanityDocument = {
+        _type: groqQueries.COMMENT_THREAD.type,
+        sourceOfCommentThread: cmsUtils.getSanityDocumentRef(postId),
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Comment Thread ", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create comment thread", {postId, e})
+        return e
+    })
+}
+
 export default {
+    createCommentThread,
     createReplaceExtendedProfile,
     fetchExtendedProfile,
     createUser,
@@ -765,15 +869,17 @@ export default {
     uploadUserPost,
     uploadBugReport,
     changeDisplayName,
-    fetchUser,
+    fetchUser,fetchPost,
+
     fetchAllUsers,
     fetchAllUsersPaginated,
     fetchAllPostsPaginated,
-    createLike: createLike,
+    fetchPostCommentsPaginated,
+    createLike,
     fetchProfileLike,
     createProfileBlock,
     fetchProfileLikes,
-    // fetchProfileBlocks,
+    createPostComment,
     fetchProfileComments,
     fetchPosts,
     removeLike,
