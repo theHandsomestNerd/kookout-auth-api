@@ -38,8 +38,14 @@ export default () =>
                 .title('Follow')
                 .child(createSuperPane('Follow', S)),
             S.listItem()
+                .title('Post Comment')
+                .child(createSuperPane('PostComment', S)),
+            S.listItem()
                 .title('Comment')
                 .child(createSuperPane('Comment', S)),
+            S.listItem()
+                .title('Comment Thread')
+                .child(createSuperPane('CommentThread', S)),
             S.listItem()
                 .title('Category')
                 .child(createSuperPane('Category', S)),

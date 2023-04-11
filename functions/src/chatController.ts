@@ -138,6 +138,38 @@ const getAllPostsPaginated = async (req: any, res: any) => {
 
 }
 
+const getCommentThreadPaginated = async (req: any, res: any) => {
+    var {lastId, pageSize, documentId} = req.params;
+    const LOG_COMPONENT = `get-${documentId}-comment-thread-comments-paginated-${pageSize}-${lastId}`;
+    logClient.log(LOG_COMPONENT, "DEBUG",
+        "Getting paginated comments from  for doc - paginated");
+
+    const headers = req.headers;
+
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const thePageOfPostCommentsFromDb = await cmsService.fetchPostCommentsPaginated(whoami.uid,documentId,  pageSize, lastId,);
+
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
+                "num GET post comments paginated RESULTS", thePageOfPostCommentsFromDb.length);
+            var nextLastId;
+            if (thePageOfPostCommentsFromDb.length > 0) {
+                nextLastId = thePageOfPostCommentsFromDb[thePageOfPostCommentsFromDb.length - 1]._id
+            } else {
+                nextLastId = null // Reached the end
+            }
+
+            return res.send({comments: [...thePageOfPostCommentsFromDb], lastId: nextLastId});
+        }
+    }
+
+
+}
+
 
 const getProfileById = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -161,6 +193,31 @@ const getProfileById = async (req: any, res: any) => {
             logClient.log(LOG_COMPONENT, "NOTICE",
                 "GET USER by id RESULT", aProfile);
             return res.send({appProfile: aProfile});
+        }
+    }
+}
+const getPostById = async (req: any, res: any) => {
+    const {id}: { id: string } = req.params
+    const LOG_COMPONENT = `fetch-post-for-id-${id}`
+    if (!id) {
+        logClient.log(LOG_COMPONENT, "ERROR",
+            "Error no post id in fetch posts by id req", id)
+
+        return res.send({status: "404", message: "no post id present in url for post request"})
+    }
+
+    const headers = req.headers;
+
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const aPost = await cmsClient.fetchPost(id);
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "GET Post by id RESULT", aPost);
+            return res.send({post: aPost});
         }
     }
 }
@@ -445,8 +502,8 @@ const unlike = async (req: any, res: any) => {
 
     const headers = req.headers;
 
-    const {likeId, likeType} = req.body;
-    const LOG_COMPONENT = `unlike-${likeType}-likeid-${likeId}`
+    const {likeId} = req.body;
+    const LOG_COMPONENT = `unlike-likeid-${likeId}`
 
     logClient.log(LOG_COMPONENT, "NOTICE",
         "request to unlike profile ", likeId);
@@ -455,7 +512,7 @@ const unlike = async (req: any, res: any) => {
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
         logClient.log(LOG_COMPONENT, "DEBUG",
-            `request to unlike ${likeType} by `, whoami);
+            `request to unlike by `, whoami);
 
         const likeStatus = await cmsService.removeLike(likeId);
         if (likeStatus.transactionId) {
@@ -731,18 +788,18 @@ const commentProfile = async (req: any, res: any) => {
 
     const headers = req.headers;
 
-    const {userId, commentBody} = req.body;
-    const LOG_COMPONENT = "comment-profile-" + userId
+    const {userId, commentBody, commentType} = req.body;
+    const LOG_COMPONENT = `comment-${commentType}-` + userId
 
     logClient.log(LOG_COMPONENT, "NOTICE",
-        "request to comment profile", {userId, commentBody});
+        "request to comment "+commentType, {userId, commentBody});
 
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
         logClient.log(LOG_COMPONENT, "NOTICE",
-            "request to comment profile by", whoami);
+            `request to comment ${commentType} by`, whoami);
 
-        const commentStatus = await cmsService.createProfileComment(whoami.uid, userId, commentBody);
+        const commentStatus = await cmsService.createProfileComment(whoami.uid, userId, commentType, commentBody);
         if (commentStatus._id) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "created a Sanity Comment", {commentStatus: "SUCCESS"});
@@ -860,6 +917,8 @@ export default {
     unfollowProfile,
     getProfileFollows,
     getAllPosts,
+    getCommentThreadPaginated,
+    getPostById,
     // getProfileBlocks,
     getMyProfileBlocks,
     getTimelineEvents,

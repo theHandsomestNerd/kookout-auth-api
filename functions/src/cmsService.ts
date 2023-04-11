@@ -35,8 +35,8 @@ const removeFollow = async (followId: string) => {
     return removedFollowResponse;
 }
 
-const createProfileComment = async (commenterUserId: string, profileUserId: string, commentBody: string) => {
-    var createdComment = await cmsClient.createProfileComment(commenterUserId, profileUserId, commentBody);
+const createProfileComment = async (commenterUserId: string, profileUserId: string, commentType: string, commentBody: string) => {
+    var createdComment = commentType == 'profile-comment' ? await cmsClient.createProfileComment(commenterUserId, profileUserId, commentBody): await cmsClient.createPostComment(commenterUserId, profileUserId, commentBody);
     await timelineClient.profileCommentCreated(createdComment);
     return createdComment;
 }
@@ -74,6 +74,15 @@ const fetchAllPostsPaginated = async (userId: string, pageSize: number, lastId?:
 
     return cmsClient.fetchAllPostsPaginated(pageSize, lastId, blockedUserIds);
 }
+const fetchPostCommentsPaginated = async (userId: string, documentId:string, pageSize: number, lastId?: string,) => {
+    var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
+
+    var blockedUserIds = blockedUsers?.map((blockedUser) => {
+        return blockedUser.blocked._id
+    });
+
+    return cmsClient.fetchPostCommentsPaginated(documentId, pageSize, lastId, blockedUserIds);
+}
 const fetchProfileTimelineEvents = async (userId: string) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
 
@@ -107,6 +116,9 @@ const createPost = async (imageFile?: any, userId?: string, postBody?: string) =
     if (userId) {
         // if (imageFile.filepath) {
         const postUploaded = await cmsClient.uploadUserPost(imageFile?.filepath, userId, postBody)
+        // create comment thread link to post
+        await cmsClient.createCommentThread(postUploaded._id);
+
         await timelineClient.postCreated(postUploaded);
 
         return postUploaded
@@ -126,5 +138,6 @@ export default {
     createProfileFollow,
     fetchAllUsers,
     fetchAllUsersPaginated,
-    fetchAllPostsPaginated
+    fetchAllPostsPaginated,
+    fetchPostCommentsPaginated
 }
