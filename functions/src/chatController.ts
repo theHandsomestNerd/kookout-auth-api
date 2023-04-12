@@ -9,6 +9,7 @@ import * as path from "path";
 import * as os from "os";
 import * as fs from "fs";
 import LIKE_CATEGORY_ENUM from "./LikeCategoryEnum";
+import CommentCategoryEnum from "./CommentCategoryEnum";
 
 const getExtendedProfile = async (req: any, res: any) => {
     const {id}: { id: string } = req.params
@@ -734,15 +735,28 @@ const getProfileFollows = async (req: any, res: any) => {
     }
 }
 const getProfileComments = async (req: any, res: any) => {
-    const {id}: { id: string } = req.params
-    const LOG_COMPONENT = `get-profile-comments-${id}`
+    const {id, typeId}: { id: string, typeId:string } = req.params
+    const LOG_COMPONENT = `get-comments-${typeId}s-${id}`
     logClient.log(LOG_COMPONENT, "ERROR",
-        "Get  Profile Comments Request", id)
+        `Get Comments  ${typeId}s Request`, id)
     if (!id) {
         logClient.log(LOG_COMPONENT, "ERROR",
-            "Error no user id in get profile comments req", id)
+            `Error no user id in get ${typeId} comments req`, id)
 
         return res.send({status: "404", message: "no id present in url for get profile comments request"})
+    }
+
+    var processedCommentType;
+    switch (typeId) {
+        case 'profile-comment':
+            processedCommentType = CommentCategoryEnum.PROFILE_COMMENT;
+            break;
+        case 'post-comment':
+            processedCommentType = CommentCategoryEnum.POST_COMMENT;
+            break;
+        default:
+            processedCommentType = CommentCategoryEnum.PROFILE_COMMENT;
+            break;
     }
 
     const headers = req.headers;
@@ -752,10 +766,10 @@ const getProfileComments = async (req: any, res: any) => {
         if (!whoami.uid) {
             res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const profileComments = await cmsService.fetchProfileComments(id, whoami.uid);
+            const profileComments = await cmsService.fetchProfileComments(processedCommentType,id, whoami.uid);
 
             logClient.log(LOG_COMPONENT, "NOTICE",
-                "Profile Comments", profileComments);
+                `${typeId}s`, profileComments);
 
             res.status(200).send({profileComments: profileComments});
         }

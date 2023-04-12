@@ -1,6 +1,6 @@
 {
   "name": "functions",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.12",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "clean": "rm -Rf lib",

@@ -285,13 +285,13 @@ const fetchProfileFollows = (userId: string): Promise<SanityFollow[] | undefined
             return Promise.resolve(undefined);
         })
 }
-const fetchProfileComments = (userId: string, blockedIds?: string[]): Promise<SanityComment[] | undefined> => {
-    const LOG = "fetch-profile-comment-" + userId
+const fetchProfileComments = (typeId:string, userId: string, blockedIds?: string[]): Promise<SanityComment[] | undefined> => {
+    const LOG = `fetch-${typeId}s-` + userId
 
     var queryString = "_type == $thisType && recipient._ref == $userId";
     var queryParams: any = {
         userId,
-        thisType: groqQueries.COMMENT.type,
+        thisType: typeId == 'profile-comment'?groqQueries.COMMENT.type:groqQueries.POST_COMMENT.type,
     }
 
     if (blockedIds && blockedIds.length > 0) {
@@ -305,7 +305,7 @@ const fetchProfileComments = (userId: string, blockedIds?: string[]): Promise<Sa
     return sanityClient
         .fetch(
             `*[${queryString}]| order(publishedAt asc){
-          ${groqQueries.COMMENT.members}
+          ${typeId == 'profile-comment'?groqQueries.COMMENT.members:groqQueries.POST_COMMENT.members}
        }`,
             queryParams
         ).then((data: SanityComment[]) => {

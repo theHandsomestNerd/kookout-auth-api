@@ -93,14 +93,14 @@ const fetchProfileTimelineEvents = async (userId: string) => {
     return cmsClient.fetchProfileTimelineEvents(userId, blockedUserIds);
 }
 
-const fetchProfileComments = async (userId: string, myUserId: string) => {
+const fetchProfileComments = async (typeId:string, userId: string, myUserId: string) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(myUserId);
 
     var blockedUserIds = blockedUsers?.map((blockedUser) => {
         return blockedUser.blocked._id
     });
 
-    return cmsClient.fetchProfileComments(userId, blockedUserIds);
+    return cmsClient.fetchProfileComments(typeId, userId, blockedUserIds);
 }
 const fetchPosts = async (myUserId: string) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(myUserId);

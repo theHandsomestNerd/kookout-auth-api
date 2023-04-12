@@ -61,7 +61,7 @@ app.post("/unlike", chatController.unlike);
 app.get("/get-profile-likes/:id", chatController.getProfileLikes);
 
 // app.post("/uncomment-profile", chatController.commentProfile);
-app.get("/get-profile-comments/:id", chatController.getProfileComments);
+app.get("/get-comments/:typeId/:id", chatController.getProfileComments);
 
 app.post("/follow-profile", chatController.followProfile);
 app.post("/unfollow-profile", chatController.unfollowProfile);
