@@ -5,6 +5,7 @@
 import {createSuperPane} from 'sanity-super-pane'
 // eslint-disable-next-line import/no-unresolved
 import S from '@sanity/desk-tool/structure-builder'
+import {ReferencedByView} from 'part:@indent-oss/sanityio-referenced-by'
 
 export default () =>
     S.list()
@@ -56,3 +57,9 @@ export default () =>
                 .title('Media Tags')
                 .child(createSuperPane('media.tag', S))
         ]);
+export const getDefaultDocumentNode = () => {
+    return S.document().views([
+        S.view.form(),
+        S.view.component(ReferencedByView).title('Referenced by'),
+    ])
+}
