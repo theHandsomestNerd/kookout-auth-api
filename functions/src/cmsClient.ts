@@ -769,6 +769,33 @@ const fetchExtendedProfile = (id: string): Promise<SanityExtendedUserProfile[]> 
             return Promise.resolve([]);
         })
 }
+const fetchPosition = (id: string): Promise<SanityPosition> => {
+    const LOG = "fetch-position"
+    var userId = id;
+
+    return sanityClient
+        .fetch(
+            `*[_type == $theType && references($userId)] | order(_createdAt desc)[0]{
+                ${groqQueries.POSITION.members}
+            }`, {
+                userId: userId,
+                theType: groqQueries.POSITION.type
+            }
+        ).then((data: SanityPosition) => {
+            log(LOG, "NOTICE", "THe position raw", data)
+
+            if (!data) {
+                log(LOG, "INFO", `No position for user id: ${id}`)
+            }
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving position for" + id
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving position Error for id: ${id}: - ` + e.toString()))
+            return Promise.resolve([]);
+        })
+}
 
 const fetchProfileLike = (likeId: string): Promise<SanityLike> => {
     const LOG = "fetch-profile-like-" + likeId
@@ -881,6 +908,7 @@ export default {
     createReplaceExtendedProfile,
     fetchExtendedProfile,
     createUser,
+    fetchPosition,
     uploadUserProfileImage,
     uploadUserPost,
     uploadBugReport,

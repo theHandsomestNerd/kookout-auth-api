@@ -93,5 +93,6 @@ app.post("/comment-profile", chatController.commentProfile);
 app.get("/get-comment-thread-paginated/:documentId/:pageSize/:lastId", chatController.getCommentThreadPaginated);
 app.get("/get-comment-thread-paginated/:documentId/:pageSize", chatController.getCommentThreadPaginated);
 app.post("/update-position", chatController.updatePosition);
+app.get("/get-position/:id", chatController.getPosition);
 
 exports.app = functions.https.onRequest(app);

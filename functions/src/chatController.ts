@@ -49,6 +49,44 @@ const getExtendedProfile = async (req: any, res: any) => {
         }
     }
 }
+const getPosition = async (req: any, res: any) => {
+    const {id}: { id: string } = req.params
+    const LOG_COMPONENT = `fetch-position-for-user-${id}`
+
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "Get user Position Request", req.params)
+    if (!id) {
+        logClient.log(LOG_COMPONENT, "ERROR",
+            "Error no user id in fetch ext profile req", id)
+
+        return res.send({status: "404", message: "no id present in url for ext profile request"})
+    }
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
+                "No valid user from this Access Token");
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const thePosition = await cmsClient.fetchPosition(id);
+
+            const response = thePosition
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
+                "position Resp:", response);
+
+            if (thePosition == null) {
+                logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
+                    "Delivering 400:", response);
+                return res.status(200).send({noPosition: "No position found", userId: id});
+            }
+
+            return res.status(200).send({lastPosition: response ?? "No Position foound"});
+        }
+    }
+}
 
 
 const getAllProfiles = async (req: any, res: any) => {
@@ -984,6 +1022,7 @@ export default {
     getAllProfiles,
     getProfileById,
     like,
+    getPosition,
     blockProfile,
     getProfileLikes,
     unlike,
