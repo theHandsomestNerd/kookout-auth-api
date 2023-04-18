@@ -18,6 +18,7 @@ import AlbumImage from "./albumImage";
 import BugReport from "./bug-report/bugReport";
 import CommentThread from "./commentThread";
 import PostComment from "./postComment";
+import Position from "./position";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -42,5 +43,6 @@ export default createSchema({
       firebaseTwitterProvider,
       CommentThread,
       PostComment,
+      Position,
   ]),
 })

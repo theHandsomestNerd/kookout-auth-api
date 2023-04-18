@@ -11,7 +11,7 @@ import {
     SanityExtendedUserProfileRef,
     SanityFollow,
     SanityLike,
-    SanityLikeRef, SanityPost, SanityPostComment, SanityPostRef,
+    SanityLikeRef, SanityPosition, SanityPost, SanityPostComment, SanityPostRef,
     SanityTimelineEvent,
     SanityUser
 } from "../types";
@@ -54,6 +54,22 @@ const createLike = async (likerUserId: string, likeeId: string, likeType:LIKE_CA
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
         log(LOG_COMPONENT, "ERROR", "could not create like", {likerUserId, likeeUserId: likeeId, e})
+        return e
+    })
+}
+const createPosition = async (userId: string, position:SanityPosition): Promise<SanityPosition> => {
+    const LOG_COMPONENT = "create-position-" + userId;
+
+    const newSanityDocument = {
+        _type: groqQueries.POSITION.type,
+        userRef: cmsUtils.getSanityDocumentRef(userId),
+        ...position
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Position", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create position", {userId, position, e})
         return e
     })
 }
@@ -869,8 +885,9 @@ export default {
     uploadUserPost,
     uploadBugReport,
     changeDisplayName,
-    fetchUser,fetchPost,
-
+    fetchUser,
+    fetchPost,
+    createPosition,
     fetchAllUsers,
     fetchAllUsersPaginated,
     fetchAllPostsPaginated,

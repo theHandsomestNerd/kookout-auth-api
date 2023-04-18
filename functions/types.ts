@@ -171,3 +171,15 @@ export type SanityCategory = {
     description: string,
     color: { title: string, value: string }
 }
+export type SanityPosition= {
+    _id?:string
+    longitude:string,
+    latitude:string,
+    timestamp:string,
+    accuracy:string,
+    altitude:string,
+    heading:string,
+    speed:string,
+    speedAccuracy:string,
+    floor:string,
+}

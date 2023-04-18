@@ -92,5 +92,6 @@ app.get("/get-all-posts-paginated/:pageSize", chatController.getAllPostsPaginate
 app.post("/comment-profile", chatController.commentProfile);
 app.get("/get-comment-thread-paginated/:documentId/:pageSize/:lastId", chatController.getCommentThreadPaginated);
 app.get("/get-comment-thread-paginated/:documentId/:pageSize", chatController.getCommentThreadPaginated);
+app.post("/update-position", chatController.updatePosition);
 
 exports.app = functions.https.onRequest(app);

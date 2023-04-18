@@ -2,7 +2,7 @@ import * as logClient from "./logClient";
 import cmsClient from "./cmsClient";
 import authService from "./authService";
 import {DecodedIdToken} from "firebase-admin/lib/auth";
-import {Height} from "../types";
+import {Height, SanityPosition} from "../types";
 import cmsService from "./cmsService";
 import cmsUtils from "./cmsUtils";
 import * as path from "path";
@@ -90,7 +90,7 @@ const getAllProfilesPaginated = async (req: any, res: any) => {
         if (!whoami.uid) {
             return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const thisUserPaginated = await cmsService.fetchAllUsersPaginated(whoami.uid,  pageSize, lastId,);
+            const thisUserPaginated = await cmsService.fetchAllUsersPaginated(whoami.uid, pageSize, lastId,);
 
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "num GET all profiles paginated RESULTS", thisUserPaginated.length);
@@ -121,7 +121,7 @@ const getAllPostsPaginated = async (req: any, res: any) => {
         if (!whoami.uid) {
             return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const thePageOfPostsFromDb = await cmsService.fetchAllPostsPaginated(whoami.uid,  pageSize, lastId,);
+            const thePageOfPostsFromDb = await cmsService.fetchAllPostsPaginated(whoami.uid, pageSize, lastId,);
 
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "num GET all posts paginated RESULTS", thePageOfPostsFromDb.length);
@@ -153,7 +153,7 @@ const getCommentThreadPaginated = async (req: any, res: any) => {
         if (!whoami.uid) {
             return res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const thePageOfPostCommentsFromDb = await cmsService.fetchPostCommentsPaginated(whoami.uid,documentId,  pageSize, lastId,);
+            const thePageOfPostCommentsFromDb = await cmsService.fetchPostCommentsPaginated(whoami.uid, documentId, pageSize, lastId,);
 
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "num GET post comments paginated RESULTS", thePageOfPostCommentsFromDb.length);
@@ -431,6 +431,70 @@ const like = async (req: any, res: any) => {
                 "error creating like", {likeStatus: "ERROR", message: likeStatus});
 
             return res.status(400).json({likeStatus: "ERROR", body: likeStatus});
+        }
+    }
+
+    return res.status(401).json({likeStatus: "ERROR", body: "UNAUTHORIZED"});
+}
+const updatePosition = async (req: any, res: any) => {
+
+    const headers = req.headers;
+
+    const {
+        longitude,
+        latitude,
+        timestamp,
+        accuracy,
+        altitude,
+        heading,
+        speed,
+        speedAccuracy,
+        floor,
+    } = req.body;
+
+
+    const LOG_COMPONENT = `update-position`
+
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        `Updating user position`, {
+            longitude,
+            latitude,
+            timestamp,
+            accuracy,
+            altitude,
+            heading,
+            speed,
+            speedAccuracy,
+            floor
+        });
+
+    if (headers.authorization) {
+        const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
+        logClient.log(LOG_COMPONENT, "NOTICE",
+            `request to update position by`, whoami);
+        var position:SanityPosition = {
+            longitude,
+            latitude,
+            timestamp,
+            accuracy,
+            altitude,
+            heading,
+            speed,
+            speedAccuracy,
+            floor,
+        };
+
+        const creationStatus = await cmsService.createPosition(whoami.uid, position)
+        if (creationStatus._id) {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
+                "created a Sanity Position", {likeStatus: "SUCCESS"});
+
+            return res.status(200).json({likeStatus: "SUCCESS", body: creationStatus});
+        } else {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
+                "error creating position", {likeStatus: "ERROR", message: creationStatus});
+
+            return res.status(400).json({likeStatus: "ERROR", body: creationStatus});
         }
     }
 
@@ -735,7 +799,7 @@ const getProfileFollows = async (req: any, res: any) => {
     }
 }
 const getProfileComments = async (req: any, res: any) => {
-    const {id, typeId}: { id: string, typeId:string } = req.params
+    const {id, typeId}: { id: string, typeId: string } = req.params
     const LOG_COMPONENT = `get-comments-${typeId}s-${id}`
     logClient.log(LOG_COMPONENT, "ERROR",
         `Get Comments  ${typeId}s Request`, id)
@@ -766,7 +830,7 @@ const getProfileComments = async (req: any, res: any) => {
         if (!whoami.uid) {
             res.status(400).json({error: "No valid user from this Access Token"})
         } else {
-            const profileComments = await cmsService.fetchProfileComments(processedCommentType,id, whoami.uid);
+            const profileComments = await cmsService.fetchProfileComments(processedCommentType, id, whoami.uid);
 
             logClient.log(LOG_COMPONENT, "NOTICE",
                 `${typeId}s`, profileComments);
@@ -806,7 +870,7 @@ const commentProfile = async (req: any, res: any) => {
     const LOG_COMPONENT = `comment-${commentType}-` + userId
 
     logClient.log(LOG_COMPONENT, "NOTICE",
-        "request to comment "+commentType, {userId, commentBody});
+        "request to comment " + commentType, {userId, commentBody});
 
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
@@ -933,7 +997,7 @@ export default {
     getAllPosts,
     getCommentThreadPaginated,
     getPostById,
-    // getProfileBlocks,
+    updatePosition,
     getMyProfileBlocks,
     getTimelineEvents,
     getAllProfilesPaginated

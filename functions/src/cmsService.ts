@@ -1,12 +1,18 @@
 import cmsClient from "./cmsClient";
 import timelineClient from "./timelineClient";
 import LIKE_CATEGORY_ENUM from "./LikeCategoryEnum";
+import {SanityPosition} from "../types";
 
 
 const createLike = async (likerUserId: string, likeeId: string, likeType: LIKE_CATEGORY_ENUM) => {
     var createdLike = await cmsClient.createLike(likerUserId, likeeId, likeType);
     await timelineClient.likeCreated(createdLike);
     return createdLike;
+}
+const createPosition = async (userId: string, position:SanityPosition) => {
+    var createdPosition = await cmsClient.createPosition(userId, position);
+    // await timelineClient.likeCreated(createdLike);
+    return createdPosition;
 }
 
 const removeLike = async (likeId: string) => {
@@ -132,6 +138,7 @@ export default {
     fetchProfileComments,
     fetchProfileTimelineEvents,
     createLike,
+    createPosition,
     removeLike,
     removeFollow,
     createProfileComment,

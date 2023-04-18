@@ -132,5 +132,34 @@ const COMMENT_THREAD = {
 `,
     type: "CommentThread"
 }
+const POSITION = {
+    members: `
+        _id,
+        userRef->,
+        longitude,
+        latitude,
+        timestamp,
+        accuracy,
+        altitude,
+        heading,
+        speed,
+        speedAccuracy,
+        floor,
+`,
+    type: "Position"
+}
 
-export default {POST_COMMENT, COMMENT_THREAD, BUG_REPORT, EXT_PROFILE, USER, LIKE, COMMENT, FOLLOW, BLOCK, TIMELINE_EVENT, POST}
+export default {
+    POST_COMMENT,
+    COMMENT_THREAD,
+    BUG_REPORT,
+    EXT_PROFILE,
+    USER,
+    LIKE,
+    COMMENT,
+    FOLLOW,
+    BLOCK,
+    TIMELINE_EVENT,
+    POST,
+    POSITION
+}
