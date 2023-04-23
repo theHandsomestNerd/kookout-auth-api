@@ -4,7 +4,7 @@ export default {
   type: 'document',
   fields: [
     {
-      name: 'source',
+      name: 'sourceOfCommentThread',
       title: 'Source of Thread',
       type: 'reference',
       to: [{type: "Post", title: "Post"}]

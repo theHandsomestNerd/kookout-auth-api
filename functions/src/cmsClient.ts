@@ -614,11 +614,16 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
 
     return sanityClient
         .fetch(
-            `*[${queryString}][0...${pageSize}]{
+            `*[${queryString}] | order(_publishedAt desc)[0...${pageSize}]{
           ${groqQueries.POST.members}
        }`, {...queryParams}
         ).then((data: SanityPost[]) => {
             // log(LOG, "NOTICE", "The users raw", data)
+            if(data){
+                data.forEach((element)=>{
+                    log(LOG, "DEBUG", element.publishedAt.toString());
+                })
+            }
 
             if (!data) {
                 console.log(Error(`Error retrieving paginated posts: page=${pageSize} lastId=${lastId} `))
