@@ -10,8 +10,14 @@ import {
     SanityExtendedUserProfile,
     SanityExtendedUserProfileRef,
     SanityFollow,
+    SanityHashTag,
+    SanityHashTagRelationshipType,
     SanityLike,
-    SanityLikeRef, SanityPosition, SanityPost, SanityPostComment, SanityPostRef,
+    SanityLikeRef,
+    SanityPosition,
+    SanityPost,
+    SanityPostComment,
+    SanityPostRef,
     SanityTimelineEvent,
     SanityUser
 } from "../types";
@@ -66,10 +72,42 @@ const createPosition = async (userId: string, position:SanityPosition): Promise<
         ...position
     }
 
-    log(LOG_COMPONENT, "INFO", "Creating Position", newSanityDocument)
+    // log(LOG_COMPONENT, "DEBUG", "Creating Position", newSanityDocument)
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
         log(LOG_COMPONENT, "ERROR", "could not create position", {userId, position, e})
+        return e
+    })
+}
+const createIfHashtagNotExist = async (hashtag:String): Promise<SanityHashTag> => {
+    const LOG_COMPONENT = "create-hashtag?-" + hashtag;
+
+    const newSanityDocument = {
+        _type: groqQueries.HASH_TAG.type,
+        _id: hashtag.replace('#',''),
+        tag: hashtag,
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Hashtag", newSanityDocument)
+
+    return sanityClient.createIfNotExists(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create if hashtag didnt exist", {hashtag,e})
+        return e
+    })
+}
+const createHashtagRelationship = async (hashtag: SanityHashTag, documentId: string): Promise<SanityHashTagRelationshipType> => {
+    const LOG_COMPONENT = "create-hashtag-relationship-" + hashtag.tag;
+
+    const newSanityDocument = {
+        _type: groqQueries.HASH_TAG_RELATIONSHIP.type,
+        hashtagRef: cmsUtils.getSanityDocumentRef(hashtag.tag),
+        hashtaggedDocumentRef: cmsUtils.getSanityDocumentRef(documentId)
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Hashtag Relationship", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create if hashtag relationship", {hashtag,e})
         return e
     })
 }
@@ -909,6 +947,8 @@ const createCommentThread = async (postId: string,) => {
 }
 
 export default {
+    createHashtagRelationship,
+    createIfHashtagNotExist,
     createCommentThread,
     createReplaceExtendedProfile,
     fetchExtendedProfile,

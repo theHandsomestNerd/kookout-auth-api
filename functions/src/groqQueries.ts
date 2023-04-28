@@ -148,6 +148,21 @@ const POSITION = {
 `,
     type: "Position"
 }
+const HASH_TAG = {
+    members: `
+        _id,
+        tag,
+`,
+    type: "Hashtag"
+}
+const HASH_TAG_RELATIONSHIP = {
+    members: `
+        _id,
+        hashtagRef->,
+        hashtaggedDocumentRef->,
+`,
+    type: "HashtagRelation"
+}
 
 export default {
     POST_COMMENT,
@@ -161,5 +176,7 @@ export default {
     BLOCK,
     TIMELINE_EVENT,
     POST,
-    POSITION
+    POSITION,
+    HASH_TAG,
+    HASH_TAG_RELATIONSHIP,
 }

@@ -510,7 +510,7 @@ const updatePosition = async (req: any, res: any) => {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
         logClient.log(LOG_COMPONENT, "NOTICE",
             `request to update position by`, whoami);
-        var position:SanityPosition = {
+        var position: SanityPosition = {
             longitude,
             latitude,
             timestamp,
@@ -982,10 +982,10 @@ const createPost = async (req: any, res: any) => {
 
     busboy.on("finish", async () => {
 
-        const {postBody} = otherFormData
+        const {postBody, hashtags} = otherFormData
 
         logClient.log(LOG_COMPONENT, "INFO",
-            "image complete uploaded...processing other data", {postBody})
+            "image complete uploaded...processing other data", {postBody, hashtags})
 
         let createPostResp
         // if (displayName) {
@@ -999,6 +999,8 @@ const createPost = async (req: any, res: any) => {
 
         // }
 
+
+       await cmsService.createOrNotHashtags(JSON.parse(hashtags), createPostResp._id);
 
         res.send({
             postCreated: createPostResp

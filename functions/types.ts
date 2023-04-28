@@ -1,4 +1,4 @@
-import {ImageAsset, Reference, Slug} from "@sanity/types";
+import {ImageAsset, Reference, SanityDocument, Slug} from "@sanity/types";
 
 export type SanityUser = {
     _id: string,
@@ -171,15 +171,32 @@ export type SanityCategory = {
     description: string,
     color: { title: string, value: string }
 }
-export type SanityPosition= {
+export type SanityPosition = {
+    _id?: string
+    longitude: string,
+    latitude: string,
+    timestamp: string,
+    accuracy: string,
+    altitude: string,
+    heading: string,
+    speed: string,
+    speedAccuracy: string,
+    floor: string,
+}
+
+export type UIHashtag = {
+    start: number,
+    end: number,
+    text: string,
+}
+
+export type SanityHashTag = {
+    tag:string,
     _id?:string
-    longitude:string,
-    latitude:string,
-    timestamp:string,
-    accuracy:string,
-    altitude:string,
-    heading:string,
-    speed:string,
-    speedAccuracy:string,
-    floor:string,
+}
+
+export type SanityHashTagRelationshipType = {
+    hashtagRef:SanityHashTag,
+    hashtaggedDocumentRef: SanityDocument,
+    _id?:string
 }

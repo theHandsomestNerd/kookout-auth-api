@@ -9,7 +9,7 @@ const createLike = async (likerUserId: string, likeeId: string, likeType: LIKE_C
     await timelineClient.likeCreated(createdLike);
     return createdLike;
 }
-const createPosition = async (userId: string, position:SanityPosition) => {
+const createPosition = async (userId: string, position: SanityPosition) => {
     var createdPosition = await cmsClient.createPosition(userId, position);
     // await timelineClient.likeCreated(createdLike);
     return createdPosition;
@@ -42,7 +42,7 @@ const removeFollow = async (followId: string) => {
 }
 
 const createProfileComment = async (commenterUserId: string, profileUserId: string, commentType: string, commentBody: string) => {
-    var createdComment = commentType == 'profile-comment' ? await cmsClient.createProfileComment(commenterUserId, profileUserId, commentBody): await cmsClient.createPostComment(commenterUserId, profileUserId, commentBody);
+    var createdComment = commentType == 'profile-comment' ? await cmsClient.createProfileComment(commenterUserId, profileUserId, commentBody) : await cmsClient.createPostComment(commenterUserId, profileUserId, commentBody);
     await timelineClient.profileCommentCreated(createdComment);
     return createdComment;
 }
@@ -80,7 +80,7 @@ const fetchAllPostsPaginated = async (userId: string, pageSize: number, lastId?:
 
     return cmsClient.fetchAllPostsPaginated(pageSize, lastId, blockedUserIds);
 }
-const fetchPostCommentsPaginated = async (userId: string, documentId:string, pageSize: number, lastId?: string,) => {
+const fetchPostCommentsPaginated = async (userId: string, documentId: string, pageSize: number, lastId?: string,) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(userId);
 
     var blockedUserIds = blockedUsers?.map((blockedUser) => {
@@ -99,7 +99,7 @@ const fetchProfileTimelineEvents = async (userId: string) => {
     return cmsClient.fetchProfileTimelineEvents(userId, blockedUserIds);
 }
 
-const fetchProfileComments = async (typeId:string, userId: string, myUserId: string) => {
+const fetchProfileComments = async (typeId: string, userId: string, myUserId: string) => {
     var blockedUsers = await cmsClient.fetchBiDirectionalProfileBlocks(myUserId);
 
     var blockedUserIds = blockedUsers?.map((blockedUser) => {
@@ -132,7 +132,28 @@ const createPost = async (imageFile?: any, userId?: string, postBody?: string) =
     return Promise.reject(Error("no userId"))
 }
 
+const createOrNotHashtags = async (hashtags: String[], postId: string) => {
+    var sanityHashtagList = await Promise.all(hashtags.map(async (hashtag: String) => {
+        // foreach hashtags and create if not present
+        // var createHashtag = async () => {
+        return cmsClient.createIfHashtagNotExist(hashtag);
+    }));
+
+    return Promise.all(sanityHashtagList.map(async (hashtag) => {
+        //
+        // if (imageId) {
+        //     // create hashtag relationship for the images
+        //     return Promise.all([cmsClient.createHashtagRelationship(hashtag, postId), cmsClient.createHashtagRelationship(hashtag, imageId)]);
+        // }
+
+        // create hashtag relationship for the post
+        return cmsClient.createHashtagRelationship(hashtag, postId);
+    }));
+}
+
+
 export default {
+    createOrNotHashtags,
     fetchPosts,
     createPost,
     fetchProfileComments,

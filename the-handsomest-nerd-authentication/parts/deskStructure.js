@@ -27,6 +27,12 @@ export default () =>
                 .title('TimelineEvent')
                 .child(createSuperPane('TimelineEvent', S)),
             S.listItem()
+                .title('Hashtag')
+                .child(createSuperPane('Hashtag', S)),
+            S.listItem()
+                .title('HashtagRelation')
+                .child(createSuperPane('HashtagRelation', S)),
+            S.listItem()
                 .title('Like')
                 .child(createSuperPane('Like', S)),
             S.listItem()

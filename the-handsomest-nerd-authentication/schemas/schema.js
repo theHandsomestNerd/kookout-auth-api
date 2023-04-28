@@ -19,6 +19,8 @@ import BugReport from "./bug-report/bugReport";
 import CommentThread from "./commentThread";
 import PostComment from "./postComment";
 import Position from "./position";
+import HashTag from "./hashtag/hashTag";
+import HashTagRelations from "./hashtag/hashTagRelations";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -44,5 +46,7 @@ export default createSchema({
       CommentThread,
       PostComment,
       Position,
+      HashTag,
+      HashTagRelations
   ]),
 })
