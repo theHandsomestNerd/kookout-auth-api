@@ -21,11 +21,11 @@ export default {
       of:[{type: 'PostComment'}]
     },
   ],
-  // preview: {
-  //   select: {
-  //     title: 'userRef.userId',
-  //     subtitle: 'name',
-  //     media: 'images[0].imageSrc'
-  //   },
-  // },
+  preview: {
+    select: {
+      title: 'sourceOfCommentThread.body',
+      subtitle: 'theComments.length',
+      media: 'sourceOfCommentThread.mainImage'
+    },
+  },
 };

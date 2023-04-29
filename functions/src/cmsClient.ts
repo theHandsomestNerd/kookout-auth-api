@@ -674,6 +674,58 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
             return Promise.resolve([]);
         })
 }
+
+const fetchHashtaggedPostsPaginated = (hashtagId:string, pageSize: string, theLastId?: string, blockedIds?: string[]): Promise<SanityPost[]> => {
+    const LOG = `fetch-posts-paginated-start-at-${theLastId}-${pageSize}`
+
+    var lastId: (string | null) = theLastId ?? null
+    var queryString = "_type == $thisType && references($hashtagId)"
+    var queryParams: any = {
+        thisType: groqQueries.HASH_TAG_RELATIONSHIP.type,
+        hashtagId: hashtagId,
+        // pageSize: pageSize,
+    }
+
+    if (lastId != null && lastId != "") {
+        queryString += " && _id > $lastId"
+        queryParams = {...queryParams, lastId}
+    }
+
+    if (blockedIds && blockedIds.length > 0) {
+        log(LOG, "DEBUG", "I have blocked these users", blockedIds)
+        queryParams = {...queryParams, blockedIds: blockedIds}
+        queryString += " && !(hashtaggedDocumentRef.author._id in $blockedIds)"
+    }
+
+    log(LOG, "DEBUG", `Hashtagged posts Query paginated starting at ${lastId}:`, {queryString, queryParams})
+
+
+    return sanityClient
+        .fetch(
+            `*[${queryString}] | order(_publishedAt desc)[0...${pageSize}]{
+          ${groqQueries.HASH_TAG_RELATIONSHIP.members}
+       }`, {...queryParams}
+        ).then((data: SanityHashTagRelationshipType[]) => {
+            // log(LOG, "NOTICE", "The users raw", data)
+            if(data){
+                data.forEach((element)=>{
+                    log(LOG, "DEBUG", element.hashtaggedDocumentRef.publishedAt.toString());
+                })
+            }
+
+            if (!data) {
+                console.log(Error(`Error retrieving hashtagged paginated posts: hashtag=${hashtagId} page=${pageSize} lastId=${lastId} `))
+            }
+
+            return data.map((hashtagRelation)=>{
+                return hashtagRelation.hashtaggedDocumentRef;
+            })
+        }).catch((e: any) => {
+            const error = "Error retrieving paginated Posts"
+            log(LOG, "ERROR", error, {error: e})
+            return Promise.resolve([]);
+        })
+}
 const fetchPostCommentsPaginated = (documentId:string, pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityPostComment[]> => {
     const LOG = `fetch-post-${documentId}-comments-paginated-start-at-${theLastId}-${pageSize}`
 
@@ -947,6 +999,7 @@ const createCommentThread = async (postId: string,) => {
 }
 
 export default {
+    fetchHashtaggedPostsPaginated,
     createHashtagRelationship,
     createIfHashtagNotExist,
     createCommentThread,

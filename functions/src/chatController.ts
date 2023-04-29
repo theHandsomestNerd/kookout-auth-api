@@ -899,6 +899,31 @@ const getAllPosts = async (req: any, res: any) => {
     }
     return res.status(401).send({message: "NOt authorized", posts: []});
 }
+const getHashtaggedPostsPaginated = async (req: any, res: any) => {
+    const { hashtagId, pageSize, lastId}: { hashtagId: string, pageSize: string, lastId: string } = req.params
+
+    const LOG_COMPONENT = `get-hashtagged-posts-#${hashtagId}-${pageSize}-${lastId}`
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "Get  Hashtagged Posts Request")
+
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const hashtaggedPosts = await cmsService.fetchHashtaggedPostsPaginated(whoami.uid, hashtagId, pageSize, lastId);
+
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "Posts", hashtaggedPosts?.length);
+
+            return res.status(200).send({posts: hashtaggedPosts});
+        }
+    }
+    return res.status(401).send({message: "NOt authorized", posts: []});
+}
 
 const commentProfile = async (req: any, res: any) => {
 
@@ -1017,6 +1042,7 @@ const createPost = async (req: any, res: any) => {
     busboy.end(req.rawBody)
 }
 export default {
+    getHashtaggedPostsPaginated,
     getMyProfile,
     getExtendedProfile,
     updateCreateExtendedProfile,

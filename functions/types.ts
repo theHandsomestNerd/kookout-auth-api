@@ -1,4 +1,4 @@
-import {ImageAsset, Reference, SanityDocument, Slug} from "@sanity/types";
+import {ImageAsset, Reference, Slug} from "@sanity/types";
 
 export type SanityUser = {
     _id: string,
@@ -197,6 +197,6 @@ export type SanityHashTag = {
 
 export type SanityHashTagRelationshipType = {
     hashtagRef:SanityHashTag,
-    hashtaggedDocumentRef: SanityDocument,
+    hashtaggedDocumentRef: SanityPost,
     _id?:string
 }
