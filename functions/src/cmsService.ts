@@ -143,8 +143,6 @@ const createPost = async (imageFile?: any, userId?: string, postBody?: string) =
 
 const createOrNotHashtags = async (hashtags: String[], postId: string) => {
     var sanityHashtagList = await Promise.all(hashtags.map(async (hashtag: String) => {
-        // foreach hashtags and create if not present
-        // var createHashtag = async () => {
         return cmsClient.createIfHashtagNotExist(hashtag);
     }));
 

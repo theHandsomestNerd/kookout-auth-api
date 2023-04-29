@@ -19,7 +19,8 @@ export default {
     preview: {
         select: {
             title: `hashtagRef.tag`,
-            subtitle: 'hashtaggedDocumentRef.body'
+            subtitle: 'hashtaggedDocumentRef.body',
+            media: 'hashtaggedDocumentRef.mainImage'
         },
     },
 };

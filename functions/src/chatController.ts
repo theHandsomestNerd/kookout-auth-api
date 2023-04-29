@@ -925,25 +925,27 @@ const getHashtaggedPostsPaginated = async (req: any, res: any) => {
     return res.status(401).send({message: "NOt authorized", posts: []});
 }
 
-const commentProfile = async (req: any, res: any) => {
+const commentDocument = async (req: any, res: any) => {
 
     const headers = req.headers;
 
-    const {userId, commentBody, commentType} = req.body;
-    const LOG_COMPONENT = `comment-${commentType}-` + userId
+    const {documentId, commentBody, commentType, hashtags} = req.body;
+    const LOG_COMPONENT = `comment-${commentType}-` + documentId
 
     logClient.log(LOG_COMPONENT, "NOTICE",
-        "request to comment " + commentType, {userId, commentBody});
+        "request to comment " + commentType, {documentId, commentBody, hashtags});
 
     if (headers.authorization) {
         const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
         logClient.log(LOG_COMPONENT, "NOTICE",
             `request to comment ${commentType} by`, whoami);
 
-        const commentStatus = await cmsService.createProfileComment(whoami.uid, userId, commentType, commentBody);
+        const commentStatus = await cmsService.createProfileComment(whoami.uid, documentId, commentType, commentBody);
         if (commentStatus._id) {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
                 "created a Sanity Comment", {commentStatus: "SUCCESS"});
+
+            await cmsService.createOrNotHashtags(JSON.parse(hashtags), documentId);
 
             return res.status(200).json({commentStatus: "SUCCESS", body: commentStatus});
         } else {
@@ -1055,7 +1057,7 @@ export default {
     getProfileLikes,
     unlike,
     unblockProfile,
-    commentProfile,
+    commentDocument,
     createPost,
     getProfileComments,
     followProfile,

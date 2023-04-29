@@ -91,7 +91,7 @@ app.get("/get-all-posts-paginated/:pageSize", chatController.getAllPostsPaginate
 app.get("/get-hashtagged-posts-paginated/:hashtagId/:pageSize/:lastId", chatController.getHashtaggedPostsPaginated);
 app.get("/get-hashtagged-posts-paginated/:hashtagId/:pageSize", chatController.getHashtaggedPostsPaginated);
 
-app.post("/comment-profile", chatController.commentProfile);
+app.post("/comment-document", chatController.commentDocument);
 app.get("/get-comment-thread-paginated/:documentId/:pageSize/:lastId", chatController.getCommentThreadPaginated);
 app.get("/get-comment-thread-paginated/:documentId/:pageSize", chatController.getCommentThreadPaginated);
 app.post("/update-position", chatController.updatePosition);

@@ -706,12 +706,12 @@ const fetchHashtaggedPostsPaginated = (hashtagId:string, pageSize: string, theLa
           ${groqQueries.HASH_TAG_RELATIONSHIP.members}
        }`, {...queryParams}
         ).then((data: SanityHashTagRelationshipType[]) => {
-            // log(LOG, "NOTICE", "The users raw", data)
-            if(data){
-                data.forEach((element)=>{
-                    log(LOG, "DEBUG", element.hashtaggedDocumentRef.publishedAt.toString());
-                })
-            }
+            // log(LOG, "NOTICE", "The hashtagged posts raw", data)
+            // if(data){
+            //     data.forEach((element)=>{
+            //         log(LOG, "DEBUG", element.hashtaggedDocumentRef.publishedAt.toString());
+            //     })
+            // }
 
             if (!data) {
                 console.log(Error(`Error retrieving hashtagged paginated posts: hashtag=${hashtagId} page=${pageSize} lastId=${lastId} `))
