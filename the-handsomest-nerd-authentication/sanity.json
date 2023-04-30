@@ -1,11 +1,11 @@
 {
   "root": true,
   "api": {
-    "projectId": "dhhk6mar",
-    "dataset": "production"
+    "projectId": "abtncxbi",
+    "dataset": "development"
   },
   "project": {
-    "name": "the-handsomest-nerd-authentication"
+    "name": "kookout"
   },
   "plugins": [
     "@sanity/base",
@@ -21,7 +21,7 @@
       "name": "production",
       "title": "Production",
       "api": {
-        "projectId": "dhhk6mar",
+        "projectId": "abtncxbi",
         "dataset": "production"
       }
     },
@@ -30,7 +30,7 @@
       "title": "Development",
       "default": true,
       "api": {
-        "projectId": "dhhk6mar",
+        "projectId": "abtncxbi",
         "dataset": "development"
       }
     }
