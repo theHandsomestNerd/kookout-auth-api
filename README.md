@@ -14,7 +14,7 @@ So this is a firebase project which means that functions can be deployed to fb p
    * SANITY_STUDIO_API_APIDATASET
    * SANITY_API_TOKEN - create a new one
      in [sanity MANAGEMENT dashboard](https://www.sanity.io/organizations/ouPWjZwq7/project/abtncxbi/members/invitations)
-     if you dont have one and label with your name
+     if you don't have one and label with your name
 
 * this env file is deployed with the function to the cloud server
    * format
