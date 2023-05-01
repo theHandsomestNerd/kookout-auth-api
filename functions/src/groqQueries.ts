@@ -163,6 +163,16 @@ const HASH_TAG_RELATIONSHIP = {
 `,
     type: "HashtagRelation"
 }
+const HASH_TAG_COLLECTION = {
+    members: `
+          _id,
+          name,
+          slug,
+          description,
+          "theTags": theTags[]->,
+`,
+    type: "HashtagCollection"
+}
 
 export default {
     POST_COMMENT,
@@ -179,4 +189,5 @@ export default {
     POSITION,
     HASH_TAG,
     HASH_TAG_RELATIONSHIP,
+    HASH_TAG_COLLECTION
 }
