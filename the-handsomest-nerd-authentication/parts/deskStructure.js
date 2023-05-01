@@ -30,6 +30,9 @@ export default () =>
                 .title('Hashtag')
                 .child(createSuperPane('Hashtag', S)),
             S.listItem()
+                .title('Hashtag Collection')
+                .child(createSuperPane('HashtagCollection', S)),
+            S.listItem()
                 .title('HashtagRelation')
                 .child(createSuperPane('HashtagRelation', S)),
             S.listItem()

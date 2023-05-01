@@ -260,6 +260,31 @@ const getPostById = async (req: any, res: any) => {
         }
     }
 }
+const getHashtagCollectionBySlug = async (req: any, res: any) => {
+    const {slug}: { slug: string } = req.params
+    const LOG_COMPONENT = `fetch-hashtag-collection-for-slug-${slug}`
+    if (!slug) {
+        logClient.log(LOG_COMPONENT, "ERROR",
+            "Error no hashtag collection slug in fetch hashtag collection by id req", slug)
+
+        return res.send({status: "404", message: "no slug present in url for get hashtag collection request"})
+    }
+
+    const headers = req.headers;
+
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const aHashtagCollection = await cmsClient.fetchHashtagCollection(slug);
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "GET hashtag collection by slug RESULT", aHashtagCollection);
+            return res.send({hashtagCollection: aHashtagCollection});
+        }
+    }
+}
 
 
 const getMyProfile = async (req: any, res: any) => {
@@ -1066,6 +1091,7 @@ export default {
     getAllPosts,
     getCommentThreadPaginated,
     getPostById,
+    getHashtagCollectionBySlug,
     updatePosition,
     getMyProfileBlocks,
     getTimelineEvents,

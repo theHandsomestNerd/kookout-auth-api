@@ -200,3 +200,10 @@ export type SanityHashTagRelationshipType = {
     hashtaggedDocumentRef: SanityPost,
     _id?:string
 }
+export type SanityHashtagCollectionType = {
+    theTags:SanityHashTag[],
+    name: string,
+    description: string,
+    slug: Slug,
+    _id?:string
+}
