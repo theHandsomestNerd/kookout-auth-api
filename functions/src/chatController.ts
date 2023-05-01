@@ -315,20 +315,34 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
     const headers = req.headers;
 
     const {
+        facebook,
+        instagram,
+        twitter,
+        tiktok,
+        homePhone,
+        workPhone,
+        cellPhone,
         shortBio,
         longBio,
         height,
         weight,
         age,
-        iAm,
-        imInto,
-        imOpenTo,
-        whatIDo,
-        whatImLookingFor,
-        whatInterestsMe,
-        whereILive,
-        gender,
-        sexPreferences
+        dob,
+        dopName,
+        crossingDate,
+        address1,
+        address2,
+        city,
+        zip,
+        state,
+        govtIssuedFirstName,
+        govtIssuedMiddleName,
+        govtIssuedLastName,
+        spouse,
+        lineName,
+        lineNumber,
+        entireLinesName
+        // children,
     } = req.body;
 
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -347,7 +361,6 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
             profileData = {
                 ...profileData,
                 shortBio: shortBio ?? undefined,
-
             }
         }
         if (longBio) {
@@ -369,65 +382,146 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
                 weight: parseInt(weight),
             }
         }
-        if (iAm) {
+        if (facebook) {
             profileData = {
                 ...profileData,
-                iAm: iAm,
+                facebook: facebook,
             }
         }
-        if (imInto) {
+        if (twitter) {
             profileData = {
                 ...profileData,
-                imInto: imInto,
+                twitter: twitter,
             }
         }
-        if (imOpenTo) {
+        if (tiktok) {
             profileData = {
                 ...profileData,
-                imOpenTo: imOpenTo,
+                tiktok: tiktok,
             }
         }
-        if (whatIDo) {
+        if (instagram) {
             profileData = {
                 ...profileData,
-                whatIDo: whatIDo,
+                instagram: instagram,
             }
         }
-        if (whatImLookingFor) {
+        if (homePhone) {
             profileData = {
                 ...profileData,
-                whatImLookingFor: whatImLookingFor,
+                homePhone: homePhone,
             }
         }
-        if (whatInterestsMe) {
+        if (workPhone) {
             profileData = {
                 ...profileData,
-                whatInterestsMe: whatInterestsMe,
+                workPhone: workPhone,
             }
         }
-        if (whatImLookingFor) {
+        if (cellPhone) {
             profileData = {
                 ...profileData,
-                whatImLookingFor: whatImLookingFor,
+                cellPhone: cellPhone,
             }
         }
-        if (whereILive) {
+        if (address1) {
             profileData = {
                 ...profileData,
-                whereILive: whereILive,
+                address1: address1,
             }
         }
-        if (sexPreferences) {
+        if (address2) {
             profileData = {
                 ...profileData,
-                sexPreferences: sexPreferences,
+                address2: address2,
+            }
+        }
+        if (city) {
+            profileData = {
+                ...profileData,
+                city: city,
             }
         }
 
-        if (gender) {
+        if (state) {
             profileData = {
                 ...profileData,
-                gender: gender,
+                state: state,
+            }
+        }
+        if (zip) {
+            profileData = {
+                ...profileData,
+                zip: zip,
+            }
+        }
+
+        if (dopName) {
+            profileData = {
+                ...profileData,
+                dopName: dopName,
+            }
+        }
+        if (lineName) {
+            profileData = {
+                ...profileData,
+                lineName: lineName,
+            }
+        }
+        if (entireLinesName) {
+            profileData = {
+                ...profileData,
+                entireLinesName: entireLinesName,
+            }
+        }
+        if (lineNumber) {
+            profileData = {
+                ...profileData,
+                lineNumber: lineNumber,
+            }
+        }
+        if (dopName) {
+            profileData = {
+                ...profileData,
+                dopName: dopName,
+            }
+        }
+        if (govtIssuedFirstName) {
+            profileData = {
+                ...profileData,
+                govtIssuedFirstName: govtIssuedFirstName,
+            }
+        }
+        if (govtIssuedMiddleName) {
+            profileData = {
+                ...profileData,
+                govtIssuedMiddleName: govtIssuedMiddleName,
+            }
+        }
+        if (govtIssuedLastName) {
+            profileData = {
+                ...profileData,
+                govtIssuedLastName: govtIssuedLastName,
+            }
+        }
+        if (spouse) {
+            profileData = {
+                ...profileData,
+                spouse: spouse,
+            }
+        }
+
+        if (dob) {
+            profileData = {
+                ...profileData,
+                dob: new Date(dob),
+            }
+        }
+
+        if (crossingDate) {
+            profileData = {
+                ...profileData,
+                crossingDate: new Date(crossingDate),
             }
         }
 
@@ -925,7 +1019,7 @@ const getAllPosts = async (req: any, res: any) => {
     return res.status(401).send({message: "NOt authorized", posts: []});
 }
 const getHashtaggedPostsPaginated = async (req: any, res: any) => {
-    const { hashtagId, pageSize, lastId}: { hashtagId: string, pageSize: string, lastId: string } = req.params
+    const {hashtagId, pageSize, lastId}: { hashtagId: string, pageSize: string, lastId: string } = req.params
 
     const LOG_COMPONENT = `get-hashtagged-posts-#${hashtagId}-${pageSize}-${lastId}`
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -1052,7 +1146,7 @@ const createPost = async (req: any, res: any) => {
         // }
 
 
-       await cmsService.createOrNotHashtags(JSON.parse(hashtags), createPostResp._id);
+        await cmsService.createOrNotHashtags(JSON.parse(hashtags), createPostResp._id);
 
         res.send({
             postCreated: createPostResp
