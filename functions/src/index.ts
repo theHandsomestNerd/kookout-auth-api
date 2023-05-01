@@ -97,4 +97,7 @@ app.get("/get-comment-thread-paginated/:documentId/:pageSize", chatController.ge
 app.post("/update-position", chatController.updatePosition);
 app.get("/get-position/:id", chatController.getPosition);
 
+app.get("/get-hashtag-collection-by-slug/:slug", chatController.getHashtagCollectionBySlug);
+
+
 exports.app = functions.https.onRequest(app);

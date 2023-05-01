@@ -10,7 +10,7 @@ import {
     SanityExtendedUserProfile,
     SanityExtendedUserProfileRef,
     SanityFollow,
-    SanityHashTag,
+    SanityHashTag, SanityHashtagCollectionType,
     SanityHashTagRelationshipType,
     SanityLike,
     SanityLikeRef,
@@ -214,7 +214,7 @@ const fetchUser = (userId: string): Promise<SanityUser | undefined> => {
         })
 }
 const fetchPost = (postId: string): Promise<SanityPost | undefined> => {
-    const LOG = "fetch-post" + postId
+    const LOG = "fetch-post-" + postId
 
     return sanityClient
         .fetch(
@@ -234,6 +234,30 @@ const fetchPost = (postId: string): Promise<SanityPost | undefined> => {
             const error = "Error retrieving post"
             log(LOG, "ERROR", error, {error: e})
             console.log(Error(`Error retrieving post Error: ${postId} - ` + e.toString()))
+            return Promise.resolve(undefined);
+        })
+}
+const fetchHashtagCollection = (hashtagCollectionSlug: string): Promise<SanityPost | undefined> => {
+    const LOG = "fetch-hashtag-collection-" + hashtagCollectionSlug
+
+    return sanityClient
+        .fetch(
+            `*[_type == $thisType && slug.current == $hashtagCollectionSlug]{
+          ${groqQueries.HASH_TAG_COLLECTION.members}
+       }`,
+            {hashtagCollectionSlug: hashtagCollectionSlug, thisType: groqQueries.HASH_TAG_COLLECTION.type}
+        ).then((data: SanityHashtagCollectionType[]) => {
+            log(LOG, "NOTICE", "The hashtag collection type raw", data)
+
+            if (!data[0]) {
+                console.log(Error(`Error retrieving hashtag collection no collection returned for slug ${hashtagCollectionSlug}: `))
+            }
+
+            return data[0]
+        }).catch((e: any) => {
+            const error = "Error retrieving hashtag collection"
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(`Error retrieving hashtag collection Error: slug ${hashtagCollectionSlug} - ` + e.toString()))
             return Promise.resolve(undefined);
         })
 }
@@ -1035,5 +1059,6 @@ export default {
     fetchMyProfileBlocks,
     fetchBiDirectionalProfileBlocks,
     fetchProfileTimelineEvents,
-    fetchProfileTimelineEventsRef
+    fetchProfileTimelineEventsRef,
+    fetchHashtagCollection
 };
