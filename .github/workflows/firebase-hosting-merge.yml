@@ -5,7 +5,12 @@ name: Deploy to Firebase Hosting on merge
 'on':
   push:
     branches:
-      - main
+      - production
+env:
+  SANITY_STUDIO_API_PROJECT_ID: ${{ vars.SANITY_STUDIO_API_PROJECT_ID }}
+  SANITY_STUDIO_API_APIDATASET: ${{ vars.SANITY_STUDIO_API_APIDATASET }}
+  SANITY_STUDIO_API_VERSION: ${{ vars.SANITY_STUDIO_API_VERSION }}
+  SANITY_API_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
 jobs:
   job_id:
     runs-on: 'ubuntu-latest'
@@ -19,35 +24,35 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: create env file
+        run: |
+          cd functions
+          touch .env
+          echo "SANITY_STUDIO_API_PROJECT_ID=$SANITY_STUDIO_API_PROJECT_ID" >> .env
+          echo "SANITY_STUDIO_API_APIDATASET=$SANITY_STUDIO_API_APIDATASET" >> .env
+          echo "SANITY_STUDIO_API_VERSION=$SANITY_STUDIO_API_VERSION" >> .env
+          echo "SANITY_API_TOKEN=$SANITY_API_TOKEN" >> .env
+          cat .env
       - name: Install dependencies
-        run: | 
-            cd functions
-            npm install
-            cat > .env << EOF
-            SANITY_STUDIO_API_PROJECT_ID=${{ vars.SANITY_STUDIO_API_PROJECT_ID }}
-            SANITY_STUDIO_API_APIDATASET=${{ vars.SANITY_STUDIO_API_APIDATASET }}
-            SANITY_STUDIO_API_VERSION=${{ vars.SANITY_STUDIO_API_VERSION }},
-            SANITY_API_TOKEN=${{ secrets.SANITY_AUTH_TOKEN }}
-            EOF
-            npm run build
-            npm run genversion
-            ls -al
+        run: |
+          cd functions
+          npm install
+      - name: Install firebase dependencies
+        run: |
+          cd functions
+          npm install firebase-tools
+      - name: Build
+        run: |
+          cd functions
+          npm run build
+          ls -al
+      - name: Version bump if necessary
+        run: |
+          cd functions
+          npm run genversion
       - name: Create SA key
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $HOME/gcloud.json
       - name: Deploy Cloud Functions
         run: |
-             cd functions
-             export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json && npx firebase-tools deploy --only functions --json
-
-#      - uses: subosito/flutter-action@v2
-#        with:
-#          channel: 'stable'
-#      - run: flutter pub get
-#      - run: flutter test
-#      - run: flutter build web
-#      - uses: FirebaseExtended/action-hosting-deploy@v0
-#        with:
-#          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-#          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_THE_HANDSOMEST_NERD_AUTH }}'
-#          channelId: live
-#          projectId: the-handsomest-nerd-auth
+          cd functions
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json && npx firebase-tools deploy --only functions --json
