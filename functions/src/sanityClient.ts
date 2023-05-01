@@ -2,9 +2,9 @@
 const client = require("@sanity/client")
 
 const sanityClient = client({
-    projectId: process.env.SANITY_STUDIO_API_PROJECT_ID ?? "abtncxbi",
+    projectId: process.env.SANITY_STUDIO_API_PROJECT_ID,
     dataset: process.env.SANITY_STUDIO_API_APIDATASET,
-    apiVersion: process.env.SANITY_STUDIO_API_VERSION ?? "2021-03-25",
+    apiVersion: process.env.SANITY_STUDIO_API_VERSION,
     token: process.env.SANITY_API_TOKEN,
     useCdn: false
 })
