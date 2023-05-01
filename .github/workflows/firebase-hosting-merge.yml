@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: | 
             cd functions
+            cat > .env << EOF
+            SANITY_STUDIO_API_PROJECT_ID=${{ vars.SANITY_STUDIO_API_PROJECT_ID }}
+            SANITY_STUDIO_API_APIDATASET=${{ vars.SANITY_STUDIO_API_APIDATASET }}
+            SANITY_STUDIO_API_VERSION=${{ vars.SANITY_STUDIO_API_VERSION }},
+            SANITY_API_TOKEN=${{ secrets.SANITY_AUTH_TOKEN }}
             npm install
             npm run build
             npm run genversion
