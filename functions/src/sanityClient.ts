@@ -3,10 +3,10 @@ const client = require("@sanity/client")
 const functions = require('firebase-functions')
 
 const sanityClient = client({
-    projectId: process.env.SANITY_STUDIO_API_PROJECT_ID ?? functions.config().sanity.SANITY_STUDIO_API_PROJECT_ID,
-    dataset: process.env.SANITY_STUDIO_API_APIDATASET ?? functions.config().sanity.SANITY_STUDIO_API_APIDATASET,
-    apiVersion: process.env.SANITY_STUDIO_API_VERSION ?? functions.config().sanity.SANITY_STUDIO_API_VERSION,
-    token: process.env.SANITY_API_TOKEN ?? functions.config().sanity.SANITY_API_TOKEN,
+    projectId: functions.config()?.sanity?.project_id ?? process.env.SANITY_STUDIO_API_PROJECT_ID,
+    dataset: functions.config()?.sanity?.dataset ?? process.env.SANITY_STUDIO_API_APIDATASET,
+    apiVersion: functions.config()?.sanity?.version ?? process.env.SANITY_STUDIO_API_VERSION,
+    token: functions.config()?.sanity?.token ?? process.env.SANITY_API_TOKEN,
     useCdn: false
 })
 
