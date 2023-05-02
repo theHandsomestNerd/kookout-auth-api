@@ -519,6 +519,7 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
                 govtIssuedLastName: govtIssuedLastName,
             }
         }
+
         if (spouse) {
             profileData = {
                 ...profileData,
