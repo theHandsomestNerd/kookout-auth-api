@@ -335,13 +335,16 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
         city,
         zip,
         state,
+        ethnicity,
+        occupation,
         govtIssuedFirstName,
         govtIssuedMiddleName,
         govtIssuedLastName,
         spouse,
         lineName,
         lineNumber,
-        entireLinesName
+        entireLinesName,
+        otherChapterAffiliation
         // children,
     } = req.body;
 
@@ -367,6 +370,18 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
             profileData = {
                 ...profileData,
                 longBio: longBio,
+            }
+        }
+        if (ethnicity) {
+            profileData = {
+                ...profileData,
+                ethnicity: ethnicity,
+            }
+        }
+        if (occupation) {
+            profileData = {
+                ...profileData,
+                occupation: occupation,
             }
         }
 
@@ -477,7 +492,7 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
         if (lineNumber) {
             profileData = {
                 ...profileData,
-                lineNumber: lineNumber,
+                lineNumber: parseInt(lineNumber),
             }
         }
         if (dopName) {
@@ -504,10 +519,18 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
                 govtIssuedLastName: govtIssuedLastName,
             }
         }
+
         if (spouse) {
             profileData = {
                 ...profileData,
                 spouse: spouse,
+            }
+        }
+
+        if (otherChapterAffiliation) {
+            profileData = {
+                ...profileData,
+                otherChapterAffiliation: otherChapterAffiliation,
             }
         }
 
