@@ -219,3 +219,10 @@ export type SanityHashtagCollectionType = {
     slug: Slug,
     _id?:string
 }
+
+export type SanityCsvToProcess = {
+    objectType?: string;
+    description?: string;
+    createdDocuments?: string[];
+    csvFile?: any;
+};

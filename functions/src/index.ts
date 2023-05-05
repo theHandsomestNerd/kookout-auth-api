@@ -5,6 +5,8 @@ import * as logClient from "./logClient";
 import chatController from "./chatController";
 import authController from "./authController";
 import bugReportController from "./bugReportController";
+import webhookController from "./webhookController";
+
 const version = require('./version.js');
 
 const app = express();
@@ -98,6 +100,6 @@ app.post("/update-position", chatController.updatePosition);
 app.get("/get-position/:id", chatController.getPosition);
 
 app.get("/get-hashtag-collection-by-slug/:slug", chatController.getHashtagCollectionBySlug);
-
+app.post("/process-csv-into-sanity-documents",webhookController.processCsv)
 
 exports.app = functions.https.onRequest(app);
