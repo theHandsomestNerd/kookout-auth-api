@@ -148,6 +148,7 @@ const processCsv = async (req: any, functionRes: any) => {
 
         functions.logger.log("firstname", "INFO",
             "parsing name", sanityObj.name);
+        
         functions.logger.log("firstname", "INFO",
             "parsing name", firstName);
         functions.logger.log("middlename", "INFO",
