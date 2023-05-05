@@ -147,17 +147,19 @@ const processCsv = async (req: any, functionRes: any) => {
 
 
         functions.logger.log("firstname", "INFO",
-            "parsing name", firstName, sanityObj.name);
+            "parsing name", sanityObj.name);
+        functions.logger.log("firstname", "INFO",
+            "parsing name", firstName);
         functions.logger.log("middlename", "INFO",
-            "parsing name", middleName, sanityObj.name);
+            "parsing name", middleName);
         functions.logger.log("lastname", "INFO",
-            "parsing name", lastName, sanityObj.name);
+            "parsing name", lastName);
         functions.logger.log("title", "INFO",
-            "parsing name", title, sanityObj.name);
+            "parsing name", title);
         functions.logger.log("nickname", "INFO",
-            "parsing name", nickName, sanityObj.name);
+            "parsing name", nickName);
         functions.logger.log("other chapter", "INFO",
-            "parsing name", otherChapterAffiliation, sanityObj.name);
+            "parsing name", otherChapterAffiliation);
 
         var theTokenizedYear = sanityObj.year.split(" ");
 
@@ -206,11 +208,11 @@ const processCsv = async (req: any, functionRes: any) => {
             year: theYear ?? "",
             semester: semester,
             lineNumber: lineNumber,
-            crossingDate: new Date(sanityObj.crossingDate),
+            crossingDate: new Date(sanityObj.crossingDate)??"",
             nameOfLine: sanityObj.nameOfLine,
             lineName: sanityObj.lineName,
             dopName: sanityObj.dopName,
-            dob: new Date(sanityObj.dob),
+            dob: new Date(sanityObj.dob)??"",
             spouse: theSpouse,
             children: theChildren,
             occupation: sanityObj.occupation,
