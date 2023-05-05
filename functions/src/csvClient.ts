@@ -28,7 +28,7 @@ export type CSVCoreCustomerType = {
 export type CSVThetaChiMemberType = {
     _type?: string
     slug?: string
-    spreadsheetId?: number
+    spreadsheetId: number
     firstName: string,
     title: string,
     middleName: string,
