@@ -25,6 +25,7 @@
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.3.1",
     "genversion": "^3.1.1",
+    "get-csv": "^3.0.3",
     "queue-promise": "^2.2.1",
     "uuid": "^9.0.0"
   },
