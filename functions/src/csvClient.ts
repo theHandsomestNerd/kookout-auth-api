@@ -57,7 +57,7 @@ export type CSVThetaChiMemberType = {
 }
 
 export type CSVThetaChiMemberSpreadsheetType = {
-    spreadsheetId?: number
+    spreadsheetId: number
     name: string,
     year: string,
     crossingDate: Date,
