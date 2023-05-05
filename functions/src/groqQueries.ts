@@ -157,6 +157,7 @@ const HASH_TAG = {
     members: `
         _id,
         tag,
+        slug,
 `,
     type: "Hashtag"
 }

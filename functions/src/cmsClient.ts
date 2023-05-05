@@ -79,12 +79,13 @@ const createPosition = async (userId: string, position: SanityPosition): Promise
         return e
     })
 }
-const createIfHashtagNotExist = async (hashtag: String): Promise<SanityHashTag> => {
+const createIfHashtagNotExist = async (hashtag: string): Promise<SanityHashTag> => {
     const LOG_COMPONENT = "create-hashtag?-" + hashtag;
 
     const newSanityDocument = {
         _type: groqQueries.HASH_TAG.type,
-        _id: hashtag.replace('#', ''),
+        _id: cmsUtils.convertToSlugStr(hashtag).replace('#', ''),
+        slug: cmsUtils.convertToSlugObj(cmsUtils.convertToSlugStr(hashtag)),
         tag: hashtag,
     }
 
@@ -499,7 +500,7 @@ const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string
     log(LOG_COMPONENT, "INFO", "Creating Post", newSanityDocument)
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
-        log(LOG_COMPONENT, "ERROR", "could not create post", {userId, postBody, e})
+        log(LOG_COMPONENT, "ERROR", "could not create post", { userId, postBody, e})
         return null
     })
 }
@@ -706,10 +707,11 @@ const fetchHashtaggedPostsPaginated = (hashtagId: string, pageSize: string, theL
     const LOG = `fetch-posts-paginated-start-at-${theLastId}-${pageSize}`
 
     var lastId: (string | null) = theLastId ?? null
-    var queryString = "_type == $thisType && references($hashtagId)"
+    var queryString = "_type == $thisType && hashtagRef->slug.current == $slug"
     var queryParams: any = {
         thisType: groqQueries.HASH_TAG_RELATIONSHIP.type,
-        hashtagId: hashtagId,
+        hashtagId: cmsUtils.convertToSlugStr(hashtagId),
+        slug: cmsUtils.convertToSlugStr(hashtagId)
         // pageSize: pageSize,
     }
 
