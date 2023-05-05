@@ -1168,11 +1168,12 @@ const createPost = async (req: any, res: any) => {
 
         // }
 
-
-        await cmsService.createOrNotHashtags(JSON.parse(hashtags), createPostResp._id);
+        if(createPostResp != null) {
+            await cmsService.createOrNotHashtags(JSON.parse(hashtags), createPostResp._id);
+        }
 
         res.send({
-            postCreated: createPostResp
+            postCreated: createPostResp, status: 400
         })
         return;
     })

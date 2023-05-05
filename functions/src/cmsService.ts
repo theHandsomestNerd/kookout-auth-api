@@ -132,6 +132,9 @@ const createPost = async (imageFile?: any, userId?: string, postBody?: string) =
         // if (imageFile.filepath) {
         const postUploaded = await cmsClient.uploadUserPost(imageFile?.filepath, userId, postBody)
         // create comment thread link to post
+        if(postUploaded == null){
+            return null;
+        }
         await cmsClient.createCommentThread(postUploaded._id);
 
         await timelineClient.postCreated(postUploaded);

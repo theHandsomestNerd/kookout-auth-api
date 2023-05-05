@@ -46,7 +46,7 @@ const createUser = async (email: string, userId: string, provider: any) => {
 }
 
 
-const createLike = async (likerUserId: string, likeeId: string, likeType:LIKE_CATEGORY_ENUM): Promise<SanityLikeRef> => {
+const createLike = async (likerUserId: string, likeeId: string, likeType: LIKE_CATEGORY_ENUM): Promise<SanityLikeRef> => {
     const LOG_COMPONENT = "create-profile-like-profile-" + likerUserId + "-like-" + likeeId
 
     const newSanityDocument = {
@@ -63,7 +63,7 @@ const createLike = async (likerUserId: string, likeeId: string, likeType:LIKE_CA
         return e
     })
 }
-const createPosition = async (userId: string, position:SanityPosition): Promise<SanityPosition> => {
+const createPosition = async (userId: string, position: SanityPosition): Promise<SanityPosition> => {
     const LOG_COMPONENT = "create-position-" + userId;
 
     const newSanityDocument = {
@@ -79,19 +79,19 @@ const createPosition = async (userId: string, position:SanityPosition): Promise<
         return e
     })
 }
-const createIfHashtagNotExist = async (hashtag:String): Promise<SanityHashTag> => {
+const createIfHashtagNotExist = async (hashtag: String): Promise<SanityHashTag> => {
     const LOG_COMPONENT = "create-hashtag?-" + hashtag;
 
     const newSanityDocument = {
         _type: groqQueries.HASH_TAG.type,
-        _id: hashtag.replace('#',''),
+        _id: hashtag.replace('#', ''),
         tag: hashtag,
     }
 
     log(LOG_COMPONENT, "INFO", "Creating Hashtag", newSanityDocument)
 
     return sanityClient.createIfNotExists(newSanityDocument).catch((e: any) => {
-        log(LOG_COMPONENT, "ERROR", "could not create if hashtag didnt exist", {hashtag,e})
+        log(LOG_COMPONENT, "ERROR", "could not create if hashtag didnt exist", {hashtag, e})
         return e
     })
 }
@@ -107,7 +107,7 @@ const createHashtagRelationship = async (hashtag: SanityHashTag, documentId: str
     log(LOG_COMPONENT, "INFO", "Creating Hashtag Relationship", newSanityDocument)
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
-        log(LOG_COMPONENT, "ERROR", "could not create if hashtag relationship", {hashtag,e})
+        log(LOG_COMPONENT, "ERROR", "could not create if hashtag relationship", {hashtag, e})
         return e
     })
 }
@@ -363,13 +363,13 @@ const fetchProfileFollows = (userId: string): Promise<SanityFollow[] | undefined
             return Promise.resolve(undefined);
         })
 }
-const fetchProfileComments = (typeId:string, userId: string, blockedIds?: string[]): Promise<SanityComment[] | undefined> => {
+const fetchProfileComments = (typeId: string, userId: string, blockedIds?: string[]): Promise<SanityComment[] | undefined> => {
     const LOG = `fetch-${typeId}s-` + userId
 
     var queryString = "_type == $thisType && recipient._ref == $userId";
     var queryParams: any = {
         userId,
-        thisType: typeId == 'profile-comment'?groqQueries.COMMENT.type:groqQueries.POST_COMMENT.type,
+        thisType: typeId == 'profile-comment' ? groqQueries.COMMENT.type : groqQueries.POST_COMMENT.type,
     }
 
     if (blockedIds && blockedIds.length > 0) {
@@ -383,7 +383,7 @@ const fetchProfileComments = (typeId:string, userId: string, blockedIds?: string
     return sanityClient
         .fetch(
             `*[${queryString}]| order(publishedAt asc){
-          ${typeId == 'profile-comment'?groqQueries.COMMENT.members:groqQueries.POST_COMMENT.members}
+          ${typeId == 'profile-comment' ? groqQueries.COMMENT.members : groqQueries.POST_COMMENT.members}
        }`,
             queryParams
         ).then((data: SanityComment[]) => {
@@ -456,18 +456,23 @@ const uploadUserProfileImage = async (filePath: any, userId: string): Promise<Sa
             return Promise.reject(Error(`Error uploading user profile image asset to sanity for user ${userId} Error: ` + e.toString()))
         })
 }
-const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string): Promise<SanityPostRef> => {
+const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string):Promise<SanityPostRef|null> =>
+{
     const LOG_COMPONENT = "upload-user-post-image-" + userId
 
     var imageAsset
 
     if (filePath != null) {
-        imageAsset = await sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
-            {filename: `${userId}-post-photo`})
+        try {
 
+            imageAsset = await sanityClient.assets.upload("image", createReadStream(filePath) as unknown as Blob,
+                {filename: `${userId}-post-photo`})
+            log(LOG_COMPONENT, "NOTICE", "The post Image Asset uploaded", {imageAsset})
+        } catch (e) {
+            log(LOG_COMPONENT, "ERROR", "The image could not be created in sanity aborting post creation", {e})
 
-        log(LOG_COMPONENT, "NOTICE", "The post Image Asset uploaded", {imageAsset})
-
+            return null;
+        }
     }
     log(LOG_COMPONENT, "NOTICE", "The post body", {postBody})
 
@@ -494,11 +499,9 @@ const uploadUserPost = async (filePath?: any, userId?: string, postBody?: string
     log(LOG_COMPONENT, "INFO", "Creating Post", newSanityDocument)
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
-        log(LOG_COMPONENT, "ERROR", "could not create post", {userId, postBody})
-        return e
+        log(LOG_COMPONENT, "ERROR", "could not create post", {userId, postBody, e})
+        return null
     })
-
-
 }
 const uploadBugReport = async (filePath?: any, userId?: string, title?: string, description?: string, uiVersion?: string, apiVersion?: string, uiSanityDB?: string, apiSanityDB?: string): Promise<SanityPostRef> => {
     const LOG_COMPONENT = "upload-bug-report-image-" + userId
@@ -681,8 +684,8 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
        }`, {...queryParams}
         ).then((data: SanityPost[]) => {
             // log(LOG, "NOTICE", "The users raw", data)
-            if(data){
-                data.forEach((element)=>{
+            if (data) {
+                data.forEach((element) => {
                     log(LOG, "DEBUG", element.publishedAt.toString());
                 })
             }
@@ -699,7 +702,7 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
         })
 }
 
-const fetchHashtaggedPostsPaginated = (hashtagId:string, pageSize: string, theLastId?: string, blockedIds?: string[]): Promise<SanityPost[]> => {
+const fetchHashtaggedPostsPaginated = (hashtagId: string, pageSize: string, theLastId?: string, blockedIds?: string[]): Promise<SanityPost[]> => {
     const LOG = `fetch-posts-paginated-start-at-${theLastId}-${pageSize}`
 
     var lastId: (string | null) = theLastId ?? null
@@ -741,7 +744,7 @@ const fetchHashtaggedPostsPaginated = (hashtagId:string, pageSize: string, theLa
                 console.log(Error(`Error retrieving hashtagged paginated posts: hashtag=${hashtagId} page=${pageSize} lastId=${lastId} `))
             }
 
-            return data.map((hashtagRelation)=>{
+            return data.map((hashtagRelation) => {
                 return hashtagRelation.hashtaggedDocumentRef;
             })
         }).catch((e: any) => {
@@ -750,7 +753,7 @@ const fetchHashtaggedPostsPaginated = (hashtagId:string, pageSize: string, theLa
             return Promise.resolve([]);
         })
 }
-const fetchPostCommentsPaginated = (documentId:string, pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityPostComment[]> => {
+const fetchPostCommentsPaginated = (documentId: string, pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityPostComment[]> => {
     const LOG = `fetch-post-${documentId}-comments-paginated-start-at-${theLastId}-${pageSize}`
 
     var lastId: (string | null) = theLastId ?? null
@@ -987,7 +990,7 @@ const createProfileComment = async (commenterUserId: string, profileUserId: stri
         return e
     })
 }
-const createPostComment = async (commenterUserId: string, profileUserId: string,commentBody: string) => {
+const createPostComment = async (commenterUserId: string, profileUserId: string, commentBody: string) => {
     const LOG_COMPONENT = "create-post-comment-profile-" + profileUserId + "-comment-by-" + commenterUserId
 
     const newSanityDocument = {
