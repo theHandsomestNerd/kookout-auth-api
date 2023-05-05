@@ -145,6 +145,20 @@ const processCsv = async (req: any, functionRes: any) => {
                 firstName = theTokenizedName[0];
         }
 
+
+        functions.logger.log("firstname", "INFO",
+            "parsing name", firstName, sanityObj.name);
+        functions.logger.log("middlename", "INFO",
+            "parsing name", middleName, sanityObj.name);
+        functions.logger.log("lastname", "INFO",
+            "parsing name", lastName, sanityObj.name);
+        functions.logger.log("title", "INFO",
+            "parsing name", title, sanityObj.name);
+        functions.logger.log("nickname", "INFO",
+            "parsing name", nickName, sanityObj.name);
+        functions.logger.log("other chapter", "INFO",
+            "parsing name", otherChapterAffiliation, sanityObj.name);
+
         var theTokenizedYear = sanityObj.year.split(" ");
 
         var semester = theTokenizedYear[0];
