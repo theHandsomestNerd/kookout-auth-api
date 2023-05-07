@@ -60,8 +60,16 @@ const processCsv = async (req: any, functionRes: any) => {
     newObjects = csV.map(async (sanityObj: CSVThetaChiMemberSpreadsheetType) => {
         functions.logger.log("new csv object", "INFO",
             "csv object", sanityObj)
+        var isOnTheYard = false
+        var onCampusPosition = ""
 
-        var theTokenizedName = sanityObj.name.split(' ');
+        if (sanityObj.name.includes("*")) {
+            isOnTheYard = true;
+            var namePositionTokenized = sanityObj.name.split("*");
+            onCampusPosition = namePositionTokenized[1]?namePositionTokenized[1].trim():"";
+        }
+
+        var theTokenizedName = sanityObj.name.replace("*", "").split(' ');
         var firstName = "";
         var lastName = "";
         var middleName = "";
@@ -117,16 +125,28 @@ const processCsv = async (req: any, functionRes: any) => {
                 title = "Sr"
                 titleIndex = index;
             }
+
+            if (n === ("II")) {
+                title = "II"
+                titleIndex = index;
+            }
+            if (n === ("III")) {
+                title = "III"
+                titleIndex = index;
+            }
+
         });
 
-        // remove title
-        if (titleIndex != -1) {
-            theTokenizedName = theTokenizedName.slice(titleIndex, titleIndex + 1);
+        console.log(theTokenizedName);
+// remove title
+        if (titleIndex !== -1) {
+            theTokenizedName.splice(titleIndex, 1);
         }
+        console.log(theTokenizedName);
 
-        //remove nickname
-        if (nickNameIndex != -1) {
-            theTokenizedName = theTokenizedName.slice(nickNameIndex, nickNameIndex + 1);
+//remove nickname
+        if (nickNameIndex !== -1) {
+            theTokenizedName.splice(nickNameIndex, 1);
         }
 
 
@@ -145,78 +165,86 @@ const processCsv = async (req: any, functionRes: any) => {
                 firstName = theTokenizedName[0];
         }
 
-
-        functions.logger.log("firstname", "INFO",
-            "parsing name", sanityObj.name);
-
-        functions.logger.log("firstname", "INFO",
-            "parsing name", firstName);
-        functions.logger.log("middlename", "INFO",
-            "parsing name", middleName);
-        functions.logger.log("lastname", "INFO",
-            "parsing name", lastName);
-        functions.logger.log("title", "INFO",
-            "parsing name", title);
-        functions.logger.log("nickname", "INFO",
-            "parsing name", nickName);
-        functions.logger.log("other chapter", "INFO",
-            "parsing name", otherChapterAffiliation);
-
         var theTokenizedYear = sanityObj.year.split(" ");
 
+
         var semester = theTokenizedYear[0];
+
         var year = theTokenizedYear[1].split("-");
-        var theYear = null;
+        var theYear = year[0];
+        if (theYear.length == 2) {
+            theYear = "19" + theYear
+        }
         var lineNumber = "";
-        theYear = year[0];
         if (year.length == 2) {
-            theYear = year[0];
             lineNumber = year[1];
         }
 
-        var theTokenizedSpouse = sanityObj.spouseChildren.split("/")
 
-        var theSpouse = theTokenizedSpouse[0];
+        var theTokenizedSpouse = sanityObj.spouseChildren.replace("\\", "/").split("/")
+
+        var theSpouse = theTokenizedSpouse[0].toLowerCase() !== "single" ? theTokenizedSpouse[0] : "";
         var theChildren: string[] = [];
         if (theTokenizedSpouse.length > 1) {
             if (theTokenizedSpouse[1].includes("&")) {
 
                 theChildren = theTokenizedSpouse[1].split("&");
             }
+
             if (theTokenizedSpouse[1].includes(",")) {
 
                 theChildren = theTokenizedSpouse[1].split(",");
+            } else {
+                theChildren = [theTokenizedSpouse[1]];
             }
+
         }
+
 
         var theTokenizedCityStateZip = sanityObj.city.split(',')
 
         var theCity = theTokenizedCityStateZip[0];
-        var theTokenizedStateZip = theTokenizedCityStateZip[1].split(" ");
+        var isLivesOnCampus = false
+        if (theCity == "UMBC Campus") {
+            isLivesOnCampus = true
+            isOnTheYard = true
+        }
 
-        var theState = theTokenizedStateZip[0]
-        var theZip = theTokenizedStateZip[1]
+        var theTokenizedStateZip = theTokenizedCityStateZip[1].trim().split(" ");
 
+        var theState = theTokenizedStateZip[0].trim()
+        var theZip = theTokenizedStateZip[1].trim()
+
+        var theOccupation = sanityObj.occupation
+        var isChapterInvisible = false;
+        if (theOccupation.toLowerCase() === "chapter invisible") {
+            theOccupation = ""
+            isChapterInvisible = true;
+        }
 
         const sanityFormattedObject: CSVThetaChiMemberType = {
             spreadsheetId: sanityObj.spreadsheetId,
-            firstName: firstName,
-            lastName: lastName,
-            middleName: middleName,
+            isChapterInvisible: isChapterInvisible,
+            isOnTheYard: isOnTheYard,
+            onCampusPosition: onCampusPosition.trim(),
+            isLivesOnCampus: isLivesOnCampus,
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            middleName: middleName.trim(),
             otherChapterAffiliation: otherChapterAffiliation,
-            nickName: nickName,
+            nickName: nickName.trim(),
             title: title,
             year: theYear ?? "",
             semester: semester,
             lineNumber: lineNumber,
-            crossingDate: new Date(sanityObj.crossingDate)??"",
+            crossingDate: new Date(sanityObj.crossingDate) ?? "",
             nameOfLine: sanityObj.nameOfLine,
             lineName: sanityObj.lineName,
             dopName: sanityObj.dopName,
-            dob: new Date(sanityObj.dob)??"",
+            dob: new Date(sanityObj.dob) ?? "",
             spouse: theSpouse,
             children: theChildren,
-            occupation: sanityObj.occupation,
+            occupation: theOccupation,
             address: sanityObj.address,
             city: theCity,
             state: theState,
@@ -224,7 +252,7 @@ const processCsv = async (req: any, functionRes: any) => {
             homePhone: sanityObj.homePhone,
             workPhone: sanityObj.workPhone,
             cellPhone: sanityObj.cellPhone,
-            email: sanityObj.email,
+            email: sanityObj.email.split(",").map(e=>e.trim()),
         }
 
         queue.enqueue(() => cmsClient.createSanityDocument(sanityFormattedObject, sanityObjectType));

@@ -53,7 +53,11 @@ export type CSVThetaChiMemberType = {
     homePhone:string,
     workPhone:string,
     cellPhone:string,
-    email:string
+    email:string[]
+    isChapterInvisible:boolean
+    isOnTheYard:boolean
+    isLivesOnCampus:boolean
+    onCampusPosition:string
 }
 
 export type CSVThetaChiMemberSpreadsheetType = {
