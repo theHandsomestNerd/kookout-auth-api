@@ -65,11 +65,11 @@ const processCsv = async (req: any, functionRes: any) => {
 
         if (sanityObj.name.includes("*")) {
             isOnTheYard = true;
-            var namePositionTokenized = sanityObj.name.split("*");
+            var namePositionTokenized = sanityObj.name?.split("*");
             onCampusPosition = namePositionTokenized[1]?namePositionTokenized[1].trim():"";
         }
 
-        var theTokenizedName = sanityObj.name.replace("*", "").split(' ');
+        var theTokenizedName = sanityObj.name.replace("*", "")?.split(' ');
         var firstName = "";
         var lastName = "";
         var middleName = "";
@@ -106,7 +106,7 @@ const processCsv = async (req: any, functionRes: any) => {
             }
 
 
-            theTokenizedName = theTokenizedName.slice(0, theTokenizedName.length - 1);
+            theTokenizedName = theTokenizedName?.slice(0, theTokenizedName.length - 1);
         }
 
 
@@ -140,13 +140,13 @@ const processCsv = async (req: any, functionRes: any) => {
         console.log(theTokenizedName);
 // remove title
         if (titleIndex !== -1) {
-            theTokenizedName.splice(titleIndex, 1);
+            theTokenizedName?.splice(titleIndex, 1);
         }
         console.log(theTokenizedName);
 
 //remove nickname
         if (nickNameIndex !== -1) {
-            theTokenizedName.splice(nickNameIndex, 1);
+            theTokenizedName?.splice(nickNameIndex, 1);
         }
 
 
@@ -165,12 +165,12 @@ const processCsv = async (req: any, functionRes: any) => {
                 firstName = theTokenizedName[0];
         }
 
-        var theTokenizedYear = sanityObj.year.split(" ");
+        var theTokenizedYear = sanityObj.year?.split(" ");
 
 
         var semester = theTokenizedYear[0];
 
-        var year = theTokenizedYear[1].split("-");
+        var year = theTokenizedYear[1]?.split("-");
         var theYear = year[0];
         if (theYear.length == 2) {
             theYear = "19" + theYear
@@ -188,12 +188,12 @@ const processCsv = async (req: any, functionRes: any) => {
         if (theTokenizedSpouse.length > 1) {
             if (theTokenizedSpouse[1].includes("&")) {
 
-                theChildren = theTokenizedSpouse[1].split("&");
+                theChildren = theTokenizedSpouse[1]?.split("&");
             }
 
             if (theTokenizedSpouse[1].includes(",")) {
 
-                theChildren = theTokenizedSpouse[1].split(",");
+                theChildren = theTokenizedSpouse[1]?.split(",");
             } else {
                 theChildren = [theTokenizedSpouse[1]];
             }
@@ -226,13 +226,13 @@ const processCsv = async (req: any, functionRes: any) => {
             spreadsheetId: sanityObj.spreadsheetId,
             isChapterInvisible: isChapterInvisible,
             isOnTheYard: isOnTheYard,
-            onCampusPosition: onCampusPosition.trim(),
+            onCampusPosition: onCampusPosition?.trim(),
             isLivesOnCampus: isLivesOnCampus,
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-            middleName: middleName.trim(),
+            firstName: firstName?.trim(),
+            lastName: lastName?.trim(),
+            middleName: middleName?.trim(),
             otherChapterAffiliation: otherChapterAffiliation,
-            nickName: nickName.trim(),
+            nickName: nickName?.trim(),
             title: title,
             year: theYear ?? "",
             semester: semester,
@@ -252,7 +252,7 @@ const processCsv = async (req: any, functionRes: any) => {
             homePhone: sanityObj.homePhone,
             workPhone: sanityObj.workPhone,
             cellPhone: sanityObj.cellPhone,
-            email: sanityObj.email.split(",").map(e=>e.trim()),
+            email: sanityObj.email?.split(",").map(e=>e.trim()),
         }
 
         queue.enqueue(() => cmsClient.createSanityDocument(sanityFormattedObject, sanityObjectType));
