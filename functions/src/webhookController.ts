@@ -66,18 +66,27 @@ const processCsv = async (req: any, functionRes: any) => {
         if (sanityObj.name.includes("*")) {
             isOnTheYard = true;
             var namePositionTokenized = sanityObj.name?.split("*");
-            onCampusPosition = namePositionTokenized[1]?namePositionTokenized[1].trim():"";
+            onCampusPosition = namePositionTokenized[1] ? namePositionTokenized[1].trim() : "";
         }
 
-        var theTokenizedName = sanityObj.name.replace("*", "")?.split(' ');
+        var theTokenizedName = sanityObj.name.replace("*", ",").replace(',', '').trim().split(' ');
         var firstName = "";
         var lastName = "";
         var middleName = "";
         var nickName = "";
-        var otherChapterAffiliation = "";
+        var otherChapterAffiliation = "Theta Chi(ΘX)";
         var nickNameIndex = -1;
         var title = "";
         var titleIndex = -1;
+
+        // theTokenizedName = theTokenizedName.reduce((accumulated: string[], nameSegment) => {
+        //     var accCopy = accumulated;
+        //     if (nameSegment !== "") {
+        //         accCopy.push(nameSegment)
+        //     }
+        //
+        //     return accCopy;
+        // }, [])
 
         if (theTokenizedName[theTokenizedName.length - 1].includes("(")) {
             otherChapterAffiliation = theTokenizedName[theTokenizedName.length - 1].replace("(", "").replace(")", "");
@@ -167,53 +176,80 @@ const processCsv = async (req: any, functionRes: any) => {
 
         var theTokenizedYear = sanityObj.year?.split(" ");
 
-
         var semester = theTokenizedYear[0];
 
         var year = theTokenizedYear[1]?.split("-");
-        var theYear = year[0];
-        if (theYear.length == 2) {
-            theYear = "19" + theYear
-        }
-        var lineNumber = "";
-        if (year.length == 2) {
-            lineNumber = year[1];
-        }
 
-
-        var theTokenizedSpouse = sanityObj.spouseChildren.replace("\\", "/").split("/")
-
-        var theSpouse = theTokenizedSpouse[0].toLowerCase() !== "single" ? theTokenizedSpouse[0] : "";
-        var theChildren: string[] = [];
-        if (theTokenizedSpouse.length > 1) {
-            if (theTokenizedSpouse[1].includes("&")) {
-
-                theChildren = theTokenizedSpouse[1]?.split("&");
+            var theYear = year[0];
+            var lineNumber = "";
+        if(year.length == 2){
+            theYear = year[0];
+            if (theYear.length == 2) {
+                theYear = "19" + theYear
             }
 
-            if (theTokenizedSpouse[1].includes(",")) {
-
-                theChildren = theTokenizedSpouse[1]?.split(",");
-            } else {
-                theChildren = [theTokenizedSpouse[1]];
+            lineNumber = "";
+            if (year.length == 2) {
+                lineNumber = year[1];
             }
+        } else if(year.length == 1) {
+            theYear = year[0];
+            if (theYear.length == 2) {
+                theYear = "19" + theYear
+            }
+        }
 
+        var theSpouse = null;
+        var theChildren: string[] | null = null;
+            var theTokenizedSpouse = sanityObj.spouseChildren?.replace("\\", "/").split("/")
+
+        if(sanityObj.spouseChildren && theTokenizedSpouse.length > 0) {
+
+            theSpouse = theTokenizedSpouse[0].toLowerCase() !== "single" ? theTokenizedSpouse[0] : "";
+            theChildren = [];
+            if (theTokenizedSpouse.length > 1) {
+                if (theTokenizedSpouse[1].includes("&")) {
+                    theChildren = theTokenizedSpouse[1]?.split("&");
+                }
+
+                if (theTokenizedSpouse[1].includes(",")) {
+                    theChildren = theTokenizedSpouse[1]?.split(",");
+                } else {
+                    theChildren = [theTokenizedSpouse[1]];
+                }
+            }
         }
 
 
-        var theTokenizedCityStateZip = sanityObj.city.split(',')
+        var theTokenizedCityStateZip = null
 
-        var theCity = theTokenizedCityStateZip[0];
+        var theCity = null;
         var isLivesOnCampus = false
-        if (theCity == "UMBC Campus") {
-            isLivesOnCampus = true
-            isOnTheYard = true
+
+        var theTokenizedStateZip = [];
+
+        var theState = ""
+        var theZip = ""
+
+        if (sanityObj.city && sanityObj.city !== "") {
+            theTokenizedCityStateZip = sanityObj.city.split(',')
+
+            if(theTokenizedCityStateZip.length ===2 ){
+                theCity = theTokenizedCityStateZip[0];
+                isLivesOnCampus = false
+                if (theCity == "UMBC Campus") {
+                    isLivesOnCampus = true
+                    isOnTheYard = true
+                }
+
+                theTokenizedStateZip = theTokenizedCityStateZip[1].trim().split(" ");
+
+                theState = theTokenizedStateZip[0].trim()
+                theZip = theTokenizedStateZip[1].trim()
+            } else if(theTokenizedCityStateZip.length ===1 ){
+                theCity = theTokenizedCityStateZip[0];
+            }
         }
-
-        var theTokenizedStateZip = theTokenizedCityStateZip[1].trim().split(" ");
-
-        var theState = theTokenizedStateZip[0].trim()
-        var theZip = theTokenizedStateZip[1].trim()
 
         var theOccupation = sanityObj.occupation
         var isChapterInvisible = false;
@@ -222,7 +258,7 @@ const processCsv = async (req: any, functionRes: any) => {
             isChapterInvisible = true;
         }
 
-        const sanityFormattedObject: CSVThetaChiMemberType = {
+        var sanityFormattedObject: CSVThetaChiMemberType = {
             spreadsheetId: sanityObj.spreadsheetId,
             isChapterInvisible: isChapterInvisible,
             isOnTheYard: isOnTheYard,
@@ -242,17 +278,34 @@ const processCsv = async (req: any, functionRes: any) => {
             lineName: sanityObj.lineName,
             dopName: sanityObj.dopName,
             dob: new Date(sanityObj.dob) ?? "",
-            spouse: theSpouse,
-            children: theChildren,
+            // spouse: theSpouse,
+            // children: theChildren,
             occupation: theOccupation,
             address: sanityObj.address,
-            city: theCity,
-            state: theState,
-            postalCode: theZip,
+            // city: theCity,
+            // state: theState,
+            // postalCode: theZip,
             homePhone: sanityObj.homePhone,
             workPhone: sanityObj.workPhone,
             cellPhone: sanityObj.cellPhone,
-            email: sanityObj.email?.split(",").map(e=>e.trim()),
+            email: sanityObj.email?.split(",").map(e => e.trim()) ?? []
+        }
+
+        if (theSpouse) {
+            sanityFormattedObject = {...sanityFormattedObject, spouse: theSpouse}
+        }
+        if (theCity) {
+            sanityFormattedObject = {...sanityFormattedObject, city: theCity}
+        }
+        if (theState) {
+            sanityFormattedObject = {...sanityFormattedObject, state: theState}
+        }
+        if (theZip) {
+            sanityFormattedObject = {...sanityFormattedObject, postalCode: theZip}
+        }
+        
+        if (theChildren && theChildren.length > 0) {
+            sanityFormattedObject = {...sanityFormattedObject, children: theChildren}
         }
 
         queue.enqueue(() => cmsClient.createSanityDocument(sanityFormattedObject, sanityObjectType));
