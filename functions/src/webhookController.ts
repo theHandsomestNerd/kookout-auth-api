@@ -60,33 +60,24 @@ const processCsv = async (req: any, functionRes: any) => {
     newObjects = csV.map(async (sanityObj: CSVThetaChiMemberSpreadsheetType) => {
         functions.logger.log("new csv object", "INFO",
             "csv object", sanityObj)
-        var isOnTheYard = false
-        var onCampusPosition = ""
+        let isOnTheYard = false
+        let onCampusPosition = ""
 
         if (sanityObj.name.includes("*")) {
             isOnTheYard = true;
-            var namePositionTokenized = sanityObj.name?.split("*");
+            let namePositionTokenized = sanityObj.name?.split("*");
             onCampusPosition = namePositionTokenized[1] ? namePositionTokenized[1].trim() : "";
         }
 
-        var theTokenizedName = sanityObj.name.replace("*", ",").replace(',', '').trim().split(' ');
-        var firstName = "";
-        var lastName = "";
-        var middleName = "";
-        var nickName = "";
-        var otherChapterAffiliation = "Theta Chi(ΘX)";
-        var nickNameIndex = -1;
-        var title = "";
-        var titleIndex = -1;
-
-        // theTokenizedName = theTokenizedName.reduce((accumulated: string[], nameSegment) => {
-        //     var accCopy = accumulated;
-        //     if (nameSegment !== "") {
-        //         accCopy.push(nameSegment)
-        //     }
-        //
-        //     return accCopy;
-        // }, [])
+        let theTokenizedName = sanityObj.name.replace("*", ",").replace(',', '').trim().split(' ');
+        let firstName = "";
+        let lastName = "";
+        let middleName = "";
+        let nickName = "";
+        let otherChapterAffiliation = "Theta Chi(ΘX)";
+        let nickNameIndex = -1;
+        let title = "";
+        let titleIndex = -1;
 
         if (theTokenizedName[theTokenizedName.length - 1].includes("(")) {
             otherChapterAffiliation = theTokenizedName[theTokenizedName.length - 1].replace("(", "").replace(")", "");
@@ -159,7 +150,7 @@ const processCsv = async (req: any, functionRes: any) => {
         }
 
 
-        var sizeOfNamesLeft = theTokenizedName.length;
+        let sizeOfNamesLeft = theTokenizedName.length;
         switch (sizeOfNamesLeft) {
             case 2:
                 firstName = theTokenizedName[0];
@@ -174,36 +165,35 @@ const processCsv = async (req: any, functionRes: any) => {
                 firstName = theTokenizedName[0];
         }
 
-        var theTokenizedYear = sanityObj.year?.split(" ");
+        var theTokenizedYear = sanityObj.year.split(" ");
 
-        var semester = theTokenizedYear[0];
+        var semester = null;
+        var year = null;
+        var theYear = null;
+        var lineNumber = null;
 
-        var year = theTokenizedYear[1]?.split("-");
-
-            var theYear = year[0];
-            var lineNumber = "";
-        if(year.length == 2){
-            theYear = year[0];
-            if (theYear.length == 2) {
-                theYear = "19" + theYear
-            }
-
+        if (theTokenizedYear.length === 2) {
+            theYear = null;
             lineNumber = "";
-            if (year.length == 2) {
+            semester = theTokenizedYear[0];
+            year = theTokenizedYear[1].split("-");
+
+            if (year.length === 2) {
+                theYear = year[0];
+                if (theYear.length == 2) {
+                    theYear = "19" + theYear
+                }
                 lineNumber = year[1];
-            }
-        } else if(year.length == 1) {
-            theYear = year[0];
-            if (theYear.length == 2) {
-                theYear = "19" + theYear
+            } else if (year.length === 1) {
+                theYear = year[0];
             }
         }
 
-        var theSpouse = null;
-        var theChildren: string[] | null = null;
-            var theTokenizedSpouse = sanityObj.spouseChildren?.replace("\\", "/").split("/")
+        let theSpouse = null;
+        let theChildren: string[] | null = null;
+        let theTokenizedSpouse = sanityObj.spouseChildren?.replace("\\", "/").split("/")
 
-        if(sanityObj.spouseChildren && theTokenizedSpouse.length > 0) {
+        if (sanityObj.spouseChildren && theTokenizedSpouse.length > 0) {
 
             theSpouse = theTokenizedSpouse[0].toLowerCase() !== "single" ? theTokenizedSpouse[0] : "";
             theChildren = [];
@@ -221,20 +211,20 @@ const processCsv = async (req: any, functionRes: any) => {
         }
 
 
-        var theTokenizedCityStateZip = null
+        let theTokenizedCityStateZip = null
 
-        var theCity = null;
-        var isLivesOnCampus = false
+        let theCity = null;
+        let isLivesOnCampus = false
 
-        var theTokenizedStateZip = [];
+        let theTokenizedStateZip = [];
 
-        var theState = ""
-        var theZip = ""
+        let theState = ""
+        let theZip = ""
 
         if (sanityObj.city && sanityObj.city !== "") {
             theTokenizedCityStateZip = sanityObj.city.split(',')
 
-            if(theTokenizedCityStateZip.length ===2 ){
+            if (theTokenizedCityStateZip.length === 2) {
                 theCity = theTokenizedCityStateZip[0];
                 isLivesOnCampus = false
                 if (theCity == "UMBC Campus") {
@@ -242,23 +232,23 @@ const processCsv = async (req: any, functionRes: any) => {
                     isOnTheYard = true
                 }
 
-                theTokenizedStateZip = theTokenizedCityStateZip[1].trim().split(" ");
+                theTokenizedStateZip = theTokenizedCityStateZip[1]?.trim()?.split(" ");
 
                 theState = theTokenizedStateZip[0].trim()
                 theZip = theTokenizedStateZip[1].trim()
-            } else if(theTokenizedCityStateZip.length ===1 ){
+            } else if (theTokenizedCityStateZip.length === 1) {
                 theCity = theTokenizedCityStateZip[0];
             }
         }
 
-        var theOccupation = sanityObj.occupation
-        var isChapterInvisible = false;
+        let theOccupation = sanityObj.occupation
+        let isChapterInvisible = false;
         if (theOccupation.toLowerCase() === "chapter invisible") {
             theOccupation = ""
             isChapterInvisible = true;
         }
 
-        var sanityFormattedObject: CSVThetaChiMemberType = {
+        let sanityFormattedObject: CSVThetaChiMemberType = {
             spreadsheetId: sanityObj.spreadsheetId,
             isChapterInvisible: isChapterInvisible,
             isOnTheYard: isOnTheYard,
@@ -271,29 +261,19 @@ const processCsv = async (req: any, functionRes: any) => {
             nickName: nickName?.trim(),
             title: title,
             year: theYear ?? "",
-            semester: semester,
-            lineNumber: lineNumber,
             crossingDate: new Date(sanityObj.crossingDate) ?? "",
             nameOfLine: sanityObj.nameOfLine,
             lineName: sanityObj.lineName,
             dopName: sanityObj.dopName,
             dob: new Date(sanityObj.dob) ?? "",
-            // spouse: theSpouse,
-            // children: theChildren,
             occupation: theOccupation,
             address: sanityObj.address,
-            // city: theCity,
-            // state: theState,
-            // postalCode: theZip,
             homePhone: sanityObj.homePhone,
             workPhone: sanityObj.workPhone,
             cellPhone: sanityObj.cellPhone,
             email: sanityObj.email?.split(",").map(e => e.trim()) ?? []
         }
 
-        if (theSpouse) {
-            sanityFormattedObject = {...sanityFormattedObject, spouse: theSpouse}
-        }
         if (theCity) {
             sanityFormattedObject = {...sanityFormattedObject, city: theCity}
         }
@@ -303,7 +283,15 @@ const processCsv = async (req: any, functionRes: any) => {
         if (theZip) {
             sanityFormattedObject = {...sanityFormattedObject, postalCode: theZip}
         }
-        
+        if (semester) {
+            sanityFormattedObject = {...sanityFormattedObject, semester: semester}
+        }
+        if (lineNumber) {
+            sanityFormattedObject = {...sanityFormattedObject, lineNumber: lineNumber}
+        }
+        if (theSpouse) {
+            sanityFormattedObject = {...sanityFormattedObject, spouse: theSpouse}
+        }
         if (theChildren && theChildren.length > 0) {
             sanityFormattedObject = {...sanityFormattedObject, children: theChildren}
         }
