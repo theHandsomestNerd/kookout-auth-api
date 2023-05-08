@@ -66,11 +66,13 @@ const processCsv = async (req: any, functionRes: any) => {
         if (sanityObj.name.includes("*")) {
             isOnTheYard = true;
             let namePositionTokenized = sanityObj.name?.split("*");
-            onCampusPosition = namePositionTokenized[1] ? namePositionTokenized[1].trim() : "";
+            if (namePositionTokenized.length === 2) {
+                onCampusPosition = namePositionTokenized[1] ? namePositionTokenized[1].trim() : "";
+            }
 
         }
         let theTokenizedName = sanityObj.name.replace("*", ",").replace(',', '').trim().split(' ');
-        if(onCampusPosition){
+        if (onCampusPosition) {
             theTokenizedName?.splice(theTokenizedName.length - 1, 1);
         }
 
@@ -238,10 +240,12 @@ const processCsv = async (req: any, functionRes: any) => {
 
                 theTokenizedStateZip = theTokenizedCityStateZip[1]?.trim()?.split(" ");
 
-                theState = theTokenizedStateZip[0].trim()
-                theZip = theTokenizedStateZip[1].trim()
+                if (theTokenizedStateZip.length == 2) {
+                    theState = theTokenizedStateZip[0].trim()
+                    theZip = theTokenizedStateZip[1].trim()
+                }
             } else if (theTokenizedCityStateZip.length === 1) {
-                theCity = theTokenizedCityStateZip[0];
+                theCity = sanityObj.city;
             }
         }
 
@@ -274,7 +278,7 @@ const processCsv = async (req: any, functionRes: any) => {
             homePhone: sanityObj.homePhone,
             workPhone: sanityObj.workPhone,
             cellPhone: sanityObj.cellPhone,
-            email: sanityObj.email?.split(",").map(e => e.trim()) ?? []
+            email: sanityObj.email?.split(",").map(e => e?.trim()) ?? []
         }
 
         if (onCampusPosition) {
