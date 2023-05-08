@@ -35,15 +35,16 @@ const processCsv = async (req: any, functionRes: any) => {
         logClient.log(`process-csv-into-sanity-documents-${dataset}`, "NOTICE",
             "Created a document ", createdDocument);
         // update request
-
-        // update request with created ids
         logClient.log(`process-csv-into-sanity-documents-${dataset}`, "NOTICE",
-            `Created ${newObjects.length} new ${sanityObjectType}s`, newObjects);
+            `Created ${newObjects.length} new ${sanityObjectType}s`);
+        // update request with created ids
 
         // once all resolved somehow
         if (queue.isEmpty) {
+        // logClient.log(`process-csv-into-sanity-documents-${dataset}`, "NOTICE",
+        //     `Created ${newObjects.length} new ${sanityObjectType}s`, newObjects);
             logClient.log(`process-csv-into-sanity-documents-${dataset}`, "NOTICE",
-                "Finished processing CSV found", newObjects);
+                `Finished processing CSV ${newObjects.length} total created`, newObjects);
 
             functionRes.send({status: "200", newDocuments: newObjects});
         }
@@ -57,7 +58,7 @@ const processCsv = async (req: any, functionRes: any) => {
         }
     });
 
-    newObjects = csV.map(async (sanityObj: CSVThetaChiMemberSpreadsheetType) => {
+    newObjects = csV.map((sanityObj: CSVThetaChiMemberSpreadsheetType) => {
         functions.logger.log("new csv object", "INFO",
             "csv object", sanityObj)
         let isOnTheYard = false
@@ -309,6 +310,7 @@ const processCsv = async (req: any, functionRes: any) => {
         queue.enqueue(() => cmsClient.createSanityDocument(sanityFormattedObject, sanityObjectType));
     });
 
+    functionRes.send({status: "200", message: `Submitted ${newObjects.length} requests`});
 };
 
 export default {processCsv}
