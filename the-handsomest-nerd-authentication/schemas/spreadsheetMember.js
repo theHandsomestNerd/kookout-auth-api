@@ -171,8 +171,16 @@ export default {
     ],
     preview: {
         select: {
-            title: 'lastName',
-            subtitle: 'firstName'
+            title: 'firstName',
+            semester: 'semester',
+            year: 'year',
+            lineNumber: 'lineNumber',
+            lastName: 'lastName'
+        },
+        prepare(selection) {
+            const { semester, year, lineNumber, lastName } = selection;
+             console.log("Selection ? ", selection)
+            return { ...selection, subtitle: `${lastName} ${lineNumber} ${semester} ${year}` };
         },
     },
 };

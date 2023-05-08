@@ -57,7 +57,7 @@ export type CSVThetaChiMemberType = {
     isChapterInvisible:boolean
     isOnTheYard:boolean
     isLivesOnCampus:boolean
-    onCampusPosition:string
+    onCampusPosition?:string
 }
 
 export type CSVThetaChiMemberSpreadsheetType = {

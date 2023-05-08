@@ -61,15 +61,19 @@ const processCsv = async (req: any, functionRes: any) => {
         functions.logger.log("new csv object", "INFO",
             "csv object", sanityObj)
         let isOnTheYard = false
-        let onCampusPosition = ""
+        let onCampusPosition = null
 
         if (sanityObj.name.includes("*")) {
             isOnTheYard = true;
             let namePositionTokenized = sanityObj.name?.split("*");
             onCampusPosition = namePositionTokenized[1] ? namePositionTokenized[1].trim() : "";
+
+        }
+        let theTokenizedName = sanityObj.name.replace("*", ",").replace(',', '').trim().split(' ');
+        if(onCampusPosition){
+            theTokenizedName?.splice(theTokenizedName.length - 1, 1);
         }
 
-        let theTokenizedName = sanityObj.name.replace("*", ",").replace(',', '').trim().split(' ');
         let firstName = "";
         let lastName = "";
         let middleName = "";
@@ -252,7 +256,6 @@ const processCsv = async (req: any, functionRes: any) => {
             spreadsheetId: sanityObj.spreadsheetId,
             isChapterInvisible: isChapterInvisible,
             isOnTheYard: isOnTheYard,
-            onCampusPosition: onCampusPosition?.trim(),
             isLivesOnCampus: isLivesOnCampus,
             firstName: firstName?.trim(),
             lastName: lastName?.trim(),
@@ -274,6 +277,9 @@ const processCsv = async (req: any, functionRes: any) => {
             email: sanityObj.email?.split(",").map(e => e.trim()) ?? []
         }
 
+        if (onCampusPosition) {
+            sanityFormattedObject = {...sanityFormattedObject, onCampusPosition: onCampusPosition}
+        }
         if (theCity) {
             sanityFormattedObject = {...sanityFormattedObject, city: theCity}
         }
