@@ -193,6 +193,9 @@ const processCsv = async (req: any, functionRes: any) => {
                 lineNumber = year[1];
             } else if (year.length === 1) {
                 theYear = year[0];
+                if (year[0].length == 2) {
+                    theYear = "19" + theYear
+                }
             }
         }
 

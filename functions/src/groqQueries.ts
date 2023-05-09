@@ -179,6 +179,12 @@ const HASH_TAG_COLLECTION = {
 `,
     type: "HashtagCollection"
 }
+const SPREADSHEET_MEMBER = {
+    members: `
+          ...
+`,
+    type: "spreadsheetMember"
+}
 
 export default {
     POST_COMMENT,
@@ -195,5 +201,6 @@ export default {
     POSITION,
     HASH_TAG,
     HASH_TAG_RELATIONSHIP,
-    HASH_TAG_COLLECTION
+    HASH_TAG_COLLECTION,
+    SPREADSHEET_MEMBER
 }

@@ -264,6 +264,32 @@ const fetchHashtagCollection = (hashtagCollectionSlug: string): Promise<SanityPo
         })
 }
 
+
+const fetchChapterRoster = (): Promise<CSVThetaChiMemberType[] | undefined> => {
+    const LOG = "fetch-chapter-roster"
+
+    return sanityClient
+        .fetch(
+            `*[_type == $thisType]{
+          ...
+       }`,
+            {thisType: groqQueries.SPREADSHEET_MEMBER.type}
+        ).then((data: CSVThetaChiMemberType[]) => {
+            log(LOG, "NOTICE", "The chapter roster raw", data)
+
+            if (!data[0]) {
+                console.log(Error(`Error retrieving chapter roster`))
+            }
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving chapter roster"
+            log(LOG, "ERROR", error, {error: e})
+            console.log(Error(error + e.toString()))
+            return Promise.resolve(undefined);
+        })
+}
+
 const fetchProfileLikes = (userId: string): Promise<SanityLike[] | undefined> => {
     const LOG = "fetch-profile-likes-" + userId
 
@@ -1112,5 +1138,6 @@ export default {
     fetchProfileTimelineEvents,
     fetchProfileTimelineEventsRef,
     fetchHashtagCollection,
+    fetchChapterRoster,
     createSanityDocument
 };

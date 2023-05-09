@@ -286,6 +286,25 @@ const getHashtagCollectionBySlug = async (req: any, res: any) => {
     }
 }
 
+const getChapterRoster = async (req: any, res: any) => {
+    const LOG_COMPONENT = `fetch-chapter-roster`
+
+    const headers = req.headers;
+
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const chapterRoster = await cmsClient.fetchChapterRoster();
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "GET chapter rosteer RESULT", chapterRoster);
+            return res.send({chapterRoster: chapterRoster});
+        }
+    }
+}
+
 
 const getMyProfile = async (req: any, res: any) => {
     const LOG_COMPONENT = 'get-my-profile'
@@ -1210,6 +1229,7 @@ export default {
     getCommentThreadPaginated,
     getPostById,
     getHashtagCollectionBySlug,
+    getChapterRoster,
     updatePosition,
     getMyProfileBlocks,
     getTimelineEvents,
