@@ -1,7 +1,7 @@
 {
   "name": "kookout",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "package.json",
   "author": "James Singleton <hello@thehandsomestnerd.com>",

@@ -25,6 +25,7 @@ import HashTagCollection from "./hashtag/hashTagCollection";
 import csvToProcess from "./csv/csvToProcess";
 import csvToProcessFile from "./csv/csvToProcessFile";
 import spreadsheetMember from "./spreadsheetMember";
+import spreadsheetMemberRelation from "./spreadsheetMemberRelation";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -56,5 +57,6 @@ export default createSchema({
         csvToProcess,
         csvToProcessFile,
         spreadsheetMember,
+        spreadsheetMemberRelation
     ]),
 })

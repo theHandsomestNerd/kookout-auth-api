@@ -255,7 +255,7 @@ const processCsv = async (req: any, functionRes: any) => {
 
         let theOccupation = sanityObj.occupation
         let isChapterInvisible = false;
-        if (theOccupation.toLowerCase() === "chapter invisible") {
+        if (theOccupation.toLowerCase().includes("chapter invisible")) {
             theOccupation = ""
             isChapterInvisible = true;
         }
