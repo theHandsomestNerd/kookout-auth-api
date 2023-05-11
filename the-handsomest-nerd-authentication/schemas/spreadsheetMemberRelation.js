@@ -15,6 +15,12 @@ export default {
             type: 'reference',
             to: [{type:"user", title: "User"}]
         },
+        {
+            name: 'isApproved',
+            title: 'Approved?',
+            type: 'boolean',
+        },
+
     ],
     preview: {
         select: {

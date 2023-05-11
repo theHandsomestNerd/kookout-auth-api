@@ -169,6 +169,15 @@ const HASH_TAG_RELATIONSHIP = {
 `,
     type: "HashtagRelation"
 }
+const SPREADSHEET_RELATIONSHIP = {
+    members: `
+        _id,
+        spreadsheetMemberRef->,
+        userRef->,
+        isApproved,
+`,
+    type: "SpreadsheetMemberRelation"
+}
 const HASH_TAG_COLLECTION = {
     members: `
           _id,
@@ -201,6 +210,7 @@ export default {
     POSITION,
     HASH_TAG,
     HASH_TAG_RELATIONSHIP,
+    SPREADSHEET_RELATIONSHIP,
     HASH_TAG_COLLECTION,
     SPREADSHEET_MEMBER
 }

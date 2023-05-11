@@ -212,6 +212,12 @@ export type SanityHashTagRelationshipType = {
     hashtaggedDocumentRef: SanityPost,
     _id?:string
 }
+export type SanitySpreadsheetRelationshipType = {
+    spreadsheetMemberRef:SanityHashTag,
+    userRef: SanityPost,
+    isApproved: boolean,
+    _id?:string
+}
 export type SanityHashtagCollectionType = {
     theTags:SanityHashTag[],
     name: string,

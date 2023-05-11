@@ -85,6 +85,8 @@ app.get("/get-timeline-events", chatController.getTimelineEvents);
 app.post("/submit-bug-report", bugReportController.submitBugReport);
 
 app.post("/create-post", chatController.createPost);
+app.post("/create-verification", chatController.createVerification);
+app.get("/get-verifications", chatController.getVerifications);
 // app.post("/delete-post", chatController.updateCreateExtendedProfile);
 app.get("/get-post/:id", chatController.getPostById);
 app.get("/get-all-posts", chatController.getAllPosts);

@@ -17,7 +17,7 @@ import {
     SanityPosition,
     SanityPost,
     SanityPostComment,
-    SanityPostRef,
+    SanityPostRef, SanitySpreadsheetRelationshipType,
     SanityTimelineEvent,
     SanityUser
 } from "../types";
@@ -110,6 +110,23 @@ const createHashtagRelationship = async (hashtag: SanityHashTag, documentId: str
 
     return sanityClient.create(newSanityDocument).catch((e: any) => {
         log(LOG_COMPONENT, "ERROR", "could not create if hashtag relationship", {hashtag, e})
+        return e
+    })
+}
+const createProfileRosterRelation = async (userId: string, rosterId: string): Promise<SanitySpreadsheetRelationshipType> => {
+    const LOG_COMPONENT = "create-roster-relationship-" + rosterId + "-"+ userId;
+
+    const newSanityDocument = {
+        _type: groqQueries.SPREADSHEET_RELATIONSHIP.type,
+        userRef: cmsUtils.getSanityDocumentRef(userId),
+        spreadsheetMemberRef: cmsUtils.getSanityDocumentRef(rosterId),
+        isApproved: false
+    }
+
+    log(LOG_COMPONENT, "INFO", "Creating Profile roster Relationship", newSanityDocument)
+
+    return sanityClient.create(newSanityDocument).catch((e: any) => {
+        log(LOG_COMPONENT, "ERROR", "could not create if profile roster relationship", {rosterId,userId, e})
         return e
     })
 }
@@ -638,6 +655,36 @@ const fetchAllUsers = (blockedIds?: string[]): Promise<SanityUser[]> => {
             return Promise.resolve([]);
         })
 }
+const fetchAllSpreadsheetRelations = (): Promise<SanitySpreadsheetRelationshipType[]> => {
+    const LOG = "fetch-all-spreadsheet-relations"
+
+    var queryString = "_type == $thisType";
+    var queryParams: any = {
+        thisType: groqQueries.SPREADSHEET_RELATIONSHIP.type,
+    }
+
+    log(LOG, "Notice", `All spreadsheet relations Query:`, {queryString, queryParams})
+
+    return sanityClient
+        .fetch(
+            `*[${queryString}]{
+          ${groqQueries.SPREADSHEET_RELATIONSHIP.members}
+       }`, queryParams
+        ).then((data: SanitySpreadsheetRelationshipType[]) => {
+            // log(LOG, "NOTICE", "The users raw", data)
+
+            if (!data) {
+                console.log(Error(`Error retrieving spreadsheet member relations`))
+            }
+
+            return data
+        }).catch((e: any) => {
+            const error = "Error retrieving spreadsheet member relations"
+            log(LOG, "ERROR", error, {error: e})
+            // console.log(Error(`Error retrieving Users Error: - ` + e.toString()))
+            return Promise.resolve([]);
+        })
+}
 const fetchAllUsersPaginated = (pageSize: number, theLastId?: string, blockedIds?: string[]): Promise<SanityUser[]> => {
     const LOG = `fetch-users-paginated-start-at-${theLastId}-${pageSize}`
 
@@ -1100,6 +1147,8 @@ const createSanityDocument = async (document: CSVThetaChiMemberType, sanityType:
 };
 
 export default {
+    fetchAllSpreadsheetRelations,
+    createProfileRosterRelation,
     fetchHashtaggedPostsPaginated,
     createHashtagRelationship,
     createIfHashtagNotExist,

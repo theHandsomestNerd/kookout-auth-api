@@ -893,6 +893,35 @@ const getProfileLikes = async (req: any, res: any) => {
         }
     }
 }
+
+const getVerifications = async (req: any, res: any) => {
+    const LOG_COMPONENT = `get-all-verifications`
+    logClient.log(LOG_COMPONENT, "ERROR",
+        "Get  all member verifications")
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const memberVerifications = await cmsClient.fetchAllSpreadsheetRelations();
+
+            const amIInThisList = memberVerifications?.find((verification) => {
+                if (verification.userRef._id === whoami.uid) {
+                    return true;
+                }
+                return false
+            })
+
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "spreadsheet relations", {verifications: memberVerifications, amIInThisList});
+
+            res.status(200).send({verifications: memberVerifications, amIInThisList});
+        }
+    }
+}
 const getTimelineEvents = async (req: any, res: any) => {
     const LOG_COMPONENT = `get-timeline-events`
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -1119,6 +1148,37 @@ const commentDocument = async (req: any, res: any) => {
 
     return res.status(401).json({commentStatus: "ERROR", body: "UNAUTHORIZED"});
 }
+const createVerification = async (req: any, res: any) => {
+
+    const headers = req.headers;
+    const {rosterId} = req.body;
+
+    const LOG_COMPONENT = `create-verification-${rosterId}`
+
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "request to claim ", rosterId);
+
+    if (headers.authorization) {
+        const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
+        logClient.log(LOG_COMPONENT, "NOTICE",
+            `request to claim ${rosterId} by`, whoami);
+
+        const verificationStatus = await cmsClient.createProfileRosterRelation(whoami.uid, rosterId);
+        if (verificationStatus._id) {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
+                "created a Relationship from user to roster", {verificationStatus: "SUCCESS"});
+
+            return res.status(200).json({verificationStatus: "SUCCESS", body: verificationStatus});
+        } else {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
+                "error creating verification", {verificationStatus: "ERROR", message: verificationStatus});
+
+            return res.status(400).json({verificationStatus: "ERROR", body: verificationStatus});
+        }
+    }
+
+    return res.status(401).json({verificationStatus: "ERROR", body: "UNAUTHORIZED"});
+}
 const createPost = async (req: any, res: any) => {
     const LOG_COMPONENT = "create-post"
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -1206,6 +1266,7 @@ const createPost = async (req: any, res: any) => {
     busboy.end(req.rawBody)
 }
 export default {
+    getVerifications,
     getHashtaggedPostsPaginated,
     getMyProfile,
     getExtendedProfile,
@@ -1218,6 +1279,7 @@ export default {
     blockProfile,
     getProfileLikes,
     unlike,
+    createVerification,
     unblockProfile,
     commentDocument,
     createPost,
