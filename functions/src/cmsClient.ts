@@ -754,7 +754,7 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
 
     return sanityClient
         .fetch(
-            `*[${queryString}] | order(_createdAt asc)[0...${pageSize}]{
+            `*[${queryString}] | order(_id) [0...${pageSize}]{
           ${groqQueries.POST.members}
        }`, {...queryParams}
         ).then((data: SanityPost[]) => {
