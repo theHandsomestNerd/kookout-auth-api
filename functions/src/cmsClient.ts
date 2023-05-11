@@ -102,7 +102,7 @@ const createHashtagRelationship = async (hashtag: SanityHashTag, documentId: str
 
     const newSanityDocument = {
         _type: groqQueries.HASH_TAG_RELATIONSHIP.type,
-        hashtagRef: cmsUtils.getSanityDocumentRef(hashtag.tag),
+        hashtagRef: cmsUtils.getSanityDocumentRef(cmsUtils.convertToSlugStr(hashtag.tag)),
         hashtaggedDocumentRef: cmsUtils.getSanityDocumentRef(documentId)
     }
 
@@ -754,7 +754,7 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
 
     return sanityClient
         .fetch(
-            `*[${queryString}] | order(_publishedAt desc)[0...${pageSize}]{
+            `*[${queryString}] | order(_createdAt desc)[0...${pageSize}]{
           ${groqQueries.POST.members}
        }`, {...queryParams}
         ).then((data: SanityPost[]) => {
@@ -778,7 +778,7 @@ const fetchAllPostsPaginated = (pageSize: number, theLastId?: string, blockedIds
 }
 
 const fetchHashtaggedPostsPaginated = (hashtagId: string, pageSize: string, theLastId?: string, blockedIds?: string[]): Promise<SanityPost[]> => {
-    const LOG = `fetch-posts-paginated-start-at-${theLastId}-${pageSize}`
+    const LOG = `fetch-#${hashtagId}-hashtagged-posts-paginated-start-at-${theLastId}-${pageSize}`
 
     var lastId: (string | null) = theLastId ?? null
     var queryString = "_type == $thisType && hashtagRef->slug.current == $slug"
@@ -805,8 +805,8 @@ const fetchHashtaggedPostsPaginated = (hashtagId: string, pageSize: string, theL
 
     return sanityClient
         .fetch(
-            `*[${queryString}] | order(_publishedAt desc)[0...${pageSize}]{
-          ${groqQueries.HASH_TAG_RELATIONSHIP.members}
+            `*[${queryString}] | order(_createdAt desc)[0...${pageSize}]{
+          hashtaggedDocumentRef->
        }`, {...queryParams}
         ).then((data: SanityHashTagRelationshipType[]) => {
             // log(LOG, "NOTICE", "The hashtagged posts raw", data)
