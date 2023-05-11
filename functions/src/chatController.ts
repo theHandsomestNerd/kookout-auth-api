@@ -164,7 +164,7 @@ const getAllPostsPaginated = async (req: any, res: any) => {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "num GET all posts paginated RESULTS", thePageOfPostsFromDb.length);
             var nextLastId;
-            if (thePageOfPostsFromDb.length > 0) {
+            if (thePageOfPostsFromDb.length >= pageSize) {
                 nextLastId = thePageOfPostsFromDb[thePageOfPostsFromDb.length - 1]._id
             } else {
                 nextLastId = null // Reached the end
