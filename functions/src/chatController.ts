@@ -334,37 +334,11 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
     const headers = req.headers;
 
     const {
-        facebook,
-        instagram,
-        twitter,
-        tiktok,
-        homePhone,
-        workPhone,
-        cellPhone,
         shortBio,
         longBio,
         height,
         weight,
         age,
-        dob,
-        dopName,
-        crossingDate,
-        address1,
-        address2,
-        city,
-        zip,
-        state,
-        ethnicity,
-        occupation,
-        govtIssuedFirstName,
-        govtIssuedMiddleName,
-        govtIssuedLastName,
-        spouse,
-        lineName,
-        lineNumber,
-        entireLinesName,
-        otherChapterAffiliation
-        // children,
     } = req.body;
 
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -391,18 +365,6 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
                 longBio: longBio,
             }
         }
-        if (ethnicity) {
-            profileData = {
-                ...profileData,
-                ethnicity: ethnicity,
-            }
-        }
-        if (occupation) {
-            profileData = {
-                ...profileData,
-                occupation: occupation,
-            }
-        }
 
         if (age && age !== 0) {
             profileData = {
@@ -416,157 +378,6 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
                 weight: parseInt(weight),
             }
         }
-        if (facebook) {
-            profileData = {
-                ...profileData,
-                facebook: facebook,
-            }
-        }
-        if (twitter) {
-            profileData = {
-                ...profileData,
-                twitter: twitter,
-            }
-        }
-        if (tiktok) {
-            profileData = {
-                ...profileData,
-                tiktok: tiktok,
-            }
-        }
-        if (instagram) {
-            profileData = {
-                ...profileData,
-                instagram: instagram,
-            }
-        }
-        if (homePhone) {
-            profileData = {
-                ...profileData,
-                homePhone: homePhone,
-            }
-        }
-        if (workPhone) {
-            profileData = {
-                ...profileData,
-                workPhone: workPhone,
-            }
-        }
-        if (cellPhone) {
-            profileData = {
-                ...profileData,
-                cellPhone: cellPhone,
-            }
-        }
-        if (address1) {
-            profileData = {
-                ...profileData,
-                address1: address1,
-            }
-        }
-        if (address2) {
-            profileData = {
-                ...profileData,
-                address2: address2,
-            }
-        }
-        if (city) {
-            profileData = {
-                ...profileData,
-                city: city,
-            }
-        }
-
-        if (state) {
-            profileData = {
-                ...profileData,
-                state: state,
-            }
-        }
-        if (zip) {
-            profileData = {
-                ...profileData,
-                zip: zip,
-            }
-        }
-
-        if (dopName) {
-            profileData = {
-                ...profileData,
-                dopName: dopName,
-            }
-        }
-        if (lineName) {
-            profileData = {
-                ...profileData,
-                lineName: lineName,
-            }
-        }
-        if (entireLinesName) {
-            profileData = {
-                ...profileData,
-                entireLinesName: entireLinesName,
-            }
-        }
-        if (lineNumber) {
-            profileData = {
-                ...profileData,
-                lineNumber: parseInt(lineNumber),
-            }
-        }
-        if (dopName) {
-            profileData = {
-                ...profileData,
-                dopName: dopName,
-            }
-        }
-        if (govtIssuedFirstName) {
-            profileData = {
-                ...profileData,
-                govtIssuedFirstName: govtIssuedFirstName,
-            }
-        }
-        if (govtIssuedMiddleName) {
-            profileData = {
-                ...profileData,
-                govtIssuedMiddleName: govtIssuedMiddleName,
-            }
-        }
-        if (govtIssuedLastName) {
-            profileData = {
-                ...profileData,
-                govtIssuedLastName: govtIssuedLastName,
-            }
-        }
-
-        if (spouse) {
-            profileData = {
-                ...profileData,
-                spouse: spouse,
-            }
-        }
-
-        if (otherChapterAffiliation) {
-            profileData = {
-                ...profileData,
-                otherChapterAffiliation: otherChapterAffiliation,
-            }
-        }
-
-        if (dob) {
-            profileData = {
-                ...profileData,
-                dob: new Date(dob),
-            }
-        }
-
-        if (crossingDate) {
-            profileData = {
-                ...profileData,
-                crossingDate: new Date(crossingDate),
-            }
-        }
-
 
         if (height) {
             const intermediateHeight: Height = JSON.parse(height);
