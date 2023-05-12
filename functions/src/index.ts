@@ -1,10 +1,12 @@
 import * as functions from "firebase-functions";
-import * as express from "express";
-import * as cors from "cors";
+import express from "express";
+import cors from "cors";
 import * as logClient from "./logClient";
 import chatController from "./chatController";
 import authController from "./authController";
 import bugReportController from "./bugReportController";
+import webhookController from "./webhookController";
+
 const version = require('./version.js');
 
 const app = express();
@@ -83,6 +85,8 @@ app.get("/get-timeline-events", chatController.getTimelineEvents);
 app.post("/submit-bug-report", bugReportController.submitBugReport);
 
 app.post("/create-post", chatController.createPost);
+app.post("/create-verification", chatController.createVerification);
+app.get("/get-verifications", chatController.getVerifications);
 // app.post("/delete-post", chatController.updateCreateExtendedProfile);
 app.get("/get-post/:id", chatController.getPostById);
 app.get("/get-all-posts", chatController.getAllPosts);
@@ -97,7 +101,8 @@ app.get("/get-comment-thread-paginated/:documentId/:pageSize", chatController.ge
 app.post("/update-position", chatController.updatePosition);
 app.get("/get-position/:id", chatController.getPosition);
 
+app.get("/get-chapter-roster", chatController.getChapterRoster);
 app.get("/get-hashtag-collection-by-slug/:slug", chatController.getHashtagCollectionBySlug);
-
+app.post("/process-csv-into-sanity-documents",webhookController.processCsv)
 
 exports.app = functions.https.onRequest(app);

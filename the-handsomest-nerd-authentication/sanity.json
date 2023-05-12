@@ -31,7 +31,7 @@
       "default": true,
       "api": {
         "projectId": "dhhk6mar",
-        "dataset": "development"
+        "dataset": "production"
       }
     }
   ],

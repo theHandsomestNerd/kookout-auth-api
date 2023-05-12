@@ -132,6 +132,9 @@ const createPost = async (imageFile?: any, userId?: string, postBody?: string) =
         // if (imageFile.filepath) {
         const postUploaded = await cmsClient.uploadUserPost(imageFile?.filepath, userId, postBody)
         // create comment thread link to post
+        if(postUploaded == null){
+            return null;
+        }
         await cmsClient.createCommentThread(postUploaded._id);
 
         await timelineClient.postCreated(postUploaded);
@@ -141,8 +144,8 @@ const createPost = async (imageFile?: any, userId?: string, postBody?: string) =
     return Promise.reject(Error("no userId"))
 }
 
-const createOrNotHashtags = async (hashtags: String[], postId: string) => {
-    var sanityHashtagList = await Promise.all(hashtags.map(async (hashtag: String) => {
+const createOrNotHashtags = async (hashtags: string[], postId: string) => {
+    var sanityHashtagList = await Promise.all(hashtags.map(async (hashtag: string) => {
         return cmsClient.createIfHashtagNotExist(hashtag);
     }));
 

@@ -164,7 +164,7 @@ const getAllPostsPaginated = async (req: any, res: any) => {
             logClient.log(LOG_COMPONENT + "-" + whoami.uid, "DEBUG",
                 "num GET all posts paginated RESULTS", thePageOfPostsFromDb.length);
             var nextLastId;
-            if (thePageOfPostsFromDb.length > 0) {
+            if (thePageOfPostsFromDb.length >= pageSize) {
                 nextLastId = thePageOfPostsFromDb[thePageOfPostsFromDb.length - 1]._id
             } else {
                 nextLastId = null // Reached the end
@@ -286,6 +286,25 @@ const getHashtagCollectionBySlug = async (req: any, res: any) => {
     }
 }
 
+const getChapterRoster = async (req: any, res: any) => {
+    const LOG_COMPONENT = `fetch-chapter-roster`
+
+    const headers = req.headers;
+
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            return res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const chapterRoster = await cmsClient.fetchChapterRoster();
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "GET chapter rosteer RESULT", chapterRoster);
+            return res.send({chapterRoster: chapterRoster});
+        }
+    }
+}
+
 
 const getMyProfile = async (req: any, res: any) => {
     const LOG_COMPONENT = 'get-my-profile'
@@ -320,15 +339,6 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
         height,
         weight,
         age,
-        iAm,
-        imInto,
-        imOpenTo,
-        whatIDo,
-        whatImLookingFor,
-        whatInterestsMe,
-        whereILive,
-        gender,
-        sexPreferences
     } = req.body;
 
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -347,7 +357,6 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
             profileData = {
                 ...profileData,
                 shortBio: shortBio ?? undefined,
-
             }
         }
         if (longBio) {
@@ -369,68 +378,6 @@ const updateCreateExtendedProfile = async (req: any, res: any) => {
                 weight: parseInt(weight),
             }
         }
-        if (iAm) {
-            profileData = {
-                ...profileData,
-                iAm: iAm,
-            }
-        }
-        if (imInto) {
-            profileData = {
-                ...profileData,
-                imInto: imInto,
-            }
-        }
-        if (imOpenTo) {
-            profileData = {
-                ...profileData,
-                imOpenTo: imOpenTo,
-            }
-        }
-        if (whatIDo) {
-            profileData = {
-                ...profileData,
-                whatIDo: whatIDo,
-            }
-        }
-        if (whatImLookingFor) {
-            profileData = {
-                ...profileData,
-                whatImLookingFor: whatImLookingFor,
-            }
-        }
-        if (whatInterestsMe) {
-            profileData = {
-                ...profileData,
-                whatInterestsMe: whatInterestsMe,
-            }
-        }
-        if (whatImLookingFor) {
-            profileData = {
-                ...profileData,
-                whatImLookingFor: whatImLookingFor,
-            }
-        }
-        if (whereILive) {
-            profileData = {
-                ...profileData,
-                whereILive: whereILive,
-            }
-        }
-        if (sexPreferences) {
-            profileData = {
-                ...profileData,
-                sexPreferences: sexPreferences,
-            }
-        }
-
-        if (gender) {
-            profileData = {
-                ...profileData,
-                gender: gender,
-            }
-        }
-
 
         if (height) {
             const intermediateHeight: Height = JSON.parse(height);
@@ -757,6 +704,35 @@ const getProfileLikes = async (req: any, res: any) => {
         }
     }
 }
+
+const getVerifications = async (req: any, res: any) => {
+    const LOG_COMPONENT = `get-all-verifications`
+    logClient.log(LOG_COMPONENT, "ERROR",
+        "Get  all member verifications")
+
+    const headers = req.headers;
+    if (headers.authorization) {
+        const whoami = await authService.getUserFromAccessToken(headers.authorization);
+
+        if (!whoami.uid) {
+            res.status(400).json({error: "No valid user from this Access Token"})
+        } else {
+            const memberVerifications = await cmsClient.fetchAllSpreadsheetRelations();
+
+            const amIInThisList = memberVerifications?.find((verification) => {
+                if (verification.userRef._id === whoami.uid) {
+                    return true;
+                }
+                return false
+            })
+
+            logClient.log(LOG_COMPONENT, "NOTICE",
+                "spreadsheet relations", {verifications: memberVerifications, amIInThisList});
+
+            res.status(200).send({verifications: memberVerifications, amIInThisList});
+        }
+    }
+}
 const getTimelineEvents = async (req: any, res: any) => {
     const LOG_COMPONENT = `get-timeline-events`
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -925,7 +901,7 @@ const getAllPosts = async (req: any, res: any) => {
     return res.status(401).send({message: "NOt authorized", posts: []});
 }
 const getHashtaggedPostsPaginated = async (req: any, res: any) => {
-    const { hashtagId, pageSize, lastId}: { hashtagId: string, pageSize: string, lastId: string } = req.params
+    const {hashtagId, pageSize, lastId}: { hashtagId: string, pageSize: string, lastId: string } = req.params
 
     const LOG_COMPONENT = `get-hashtagged-posts-#${hashtagId}-${pageSize}-${lastId}`
     logClient.log(LOG_COMPONENT, "NOTICE",
@@ -982,6 +958,37 @@ const commentDocument = async (req: any, res: any) => {
     }
 
     return res.status(401).json({commentStatus: "ERROR", body: "UNAUTHORIZED"});
+}
+const createVerification = async (req: any, res: any) => {
+
+    const headers = req.headers;
+    const {rosterId} = req.body;
+
+    const LOG_COMPONENT = `create-verification-${rosterId}`
+
+    logClient.log(LOG_COMPONENT, "NOTICE",
+        "request to claim ", rosterId);
+
+    if (headers.authorization) {
+        const whoami: DecodedIdToken = await authService.getUserFromAccessToken(headers.authorization);
+        logClient.log(LOG_COMPONENT, "NOTICE",
+            `request to claim ${rosterId} by`, whoami);
+
+        const verificationStatus = await cmsClient.createProfileRosterRelation(whoami.uid, rosterId);
+        if (verificationStatus._id) {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "NOTICE",
+                "created a Relationship from user to roster", {verificationStatus: "SUCCESS"});
+
+            return res.status(200).json({verificationStatus: "SUCCESS", body: verificationStatus});
+        } else {
+            logClient.log(LOG_COMPONENT + "-" + whoami.uid, "ERROR",
+                "error creating verification", {verificationStatus: "ERROR", message: verificationStatus});
+
+            return res.status(400).json({verificationStatus: "ERROR", body: verificationStatus});
+        }
+    }
+
+    return res.status(401).json({verificationStatus: "ERROR", body: "UNAUTHORIZED"});
 }
 const createPost = async (req: any, res: any) => {
     const LOG_COMPONENT = "create-post"
@@ -1051,11 +1058,12 @@ const createPost = async (req: any, res: any) => {
 
         // }
 
-
-       await cmsService.createOrNotHashtags(JSON.parse(hashtags), createPostResp._id);
+        if(createPostResp != null) {
+            await cmsService.createOrNotHashtags(JSON.parse(hashtags), createPostResp._id);
+        }
 
         res.send({
-            postCreated: createPostResp
+            postCreated: createPostResp, status: 400
         })
         return;
     })
@@ -1069,6 +1077,7 @@ const createPost = async (req: any, res: any) => {
     busboy.end(req.rawBody)
 }
 export default {
+    getVerifications,
     getHashtaggedPostsPaginated,
     getMyProfile,
     getExtendedProfile,
@@ -1081,6 +1090,7 @@ export default {
     blockProfile,
     getProfileLikes,
     unlike,
+    createVerification,
     unblockProfile,
     commentDocument,
     createPost,
@@ -1092,6 +1102,7 @@ export default {
     getCommentThreadPaginated,
     getPostById,
     getHashtagCollectionBySlug,
+    getChapterRoster,
     updatePosition,
     getMyProfileBlocks,
     getTimelineEvents,

@@ -1,33 +1,18 @@
 const EXT_PROFILE = {
     members: `
           _id,
-          age,
           userId,
           userRef->,
-          weight,
-          height,
-          gender,
-          shortBio,
-          longBio,
           facebook,
           twitter,
           instagram,
-          partnerStatus,
           ethnicity,
-          iAm,
-          imInto,
-          imOpenTo,
-          whatIDo,
-          whatImLookingFor,
-          whatInterestsMe,
-          whereILive,
-          sexPreferences,
-          nsfwFriendly,
-          isTraveling,
-          hivStatus,
-          lastTested,
-          "pronouns": pronouns[],
-          "hashtags": hashtags[],
+          age,
+          weight,
+          height,
+          shortBio,
+          longBio,
+          "children": children[],
 `,
     type: "ExtendedProfile"
 }
@@ -152,6 +137,7 @@ const HASH_TAG = {
     members: `
         _id,
         tag,
+        slug,
 `,
     type: "Hashtag"
 }
@@ -163,6 +149,15 @@ const HASH_TAG_RELATIONSHIP = {
 `,
     type: "HashtagRelation"
 }
+const SPREADSHEET_RELATIONSHIP = {
+    members: `
+        _id,
+        spreadsheetMemberRef->,
+        userRef->,
+        isApproved,
+`,
+    type: "SpreadsheetMemberRelation"
+}
 const HASH_TAG_COLLECTION = {
     members: `
           _id,
@@ -172,6 +167,12 @@ const HASH_TAG_COLLECTION = {
           "theTags": theTags[]->,
 `,
     type: "HashtagCollection"
+}
+const SPREADSHEET_MEMBER = {
+    members: `
+          ...
+`,
+    type: "spreadsheetMember"
 }
 
 export default {
@@ -189,5 +190,7 @@ export default {
     POSITION,
     HASH_TAG,
     HASH_TAG_RELATIONSHIP,
-    HASH_TAG_COLLECTION
+    SPREADSHEET_RELATIONSHIP,
+    HASH_TAG_COLLECTION,
+    SPREADSHEET_MEMBER
 }

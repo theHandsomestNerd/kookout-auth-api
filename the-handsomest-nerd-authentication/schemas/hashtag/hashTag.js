@@ -8,6 +8,17 @@ export default {
             title: 'Tag',
             type: 'string',
         },
+        {
+            name: 'slug',
+            title: 'Slug',
+            type: 'slug',
+            options: {
+                source: (tag) => {
+                    return tag.tag;
+                },
+                maxLength: 96,
+            },
+        },
     ],
     preview: {
         select: {

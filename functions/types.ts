@@ -60,30 +60,9 @@ export type SanityExtendedUserProfile = {
     age: number,
     weight: number,
     height: Height,
-    gender: string,
     shortBio: string,
     longBio: string,
-    partnerStatus: string,
-    pronouns: string[],
     hashtags: string[],
-    ethnicity: string,
-    userId: string,
-    userRef: SanityUser,
-    iAm: string,
-    imInto: string,
-    imOpenTo: string,
-    whatIDo: string,
-    whatImLookingFor: string,
-    whatInterestsMe: string,
-    whereILive: string,
-    sexPreferences: string,
-    nsfwFriendly: boolean,
-    isTraveling: boolean,
-    hivStatus: string,
-    lastTested: Date,
-    facebook: string,
-    instagram: string,
-    twitter: string,
 }
 
 export type SanityExtendedUserProfileRef = {
@@ -91,30 +70,11 @@ export type SanityExtendedUserProfileRef = {
     age: number,
     weight: number,
     height: Height,
-    gender: string,
     shortBio: string,
     longBio: string,
-    partnerStatus: string,
-    pronouns: string[],
+    spouse: string,
+    children: string[],
     hashtags: string[],
-    ethnicity: string,
-    userId: string,
-    userRef: Reference,
-    iAm: string,
-    imInto: string,
-    imOpenTo: string,
-    whatIDo: string,
-    whatImLookingFor: string,
-    whatInterestsMe: string,
-    whereILive: string,
-    sexPreferences: string,
-    nsfwFriendly: boolean,
-    isTraveling: boolean,
-    hivStatus: string,
-    lastTested: Date,
-    facebook: string,
-    instagram: string,
-    twitter: string,
 }
 
 export type SanityPost = {
@@ -200,6 +160,12 @@ export type SanityHashTagRelationshipType = {
     hashtaggedDocumentRef: SanityPost,
     _id?:string
 }
+export type SanitySpreadsheetRelationshipType = {
+    spreadsheetMemberRef:SanityHashTag,
+    userRef: SanityPost,
+    isApproved: boolean,
+    _id?:string
+}
 export type SanityHashtagCollectionType = {
     theTags:SanityHashTag[],
     name: string,
@@ -207,3 +173,10 @@ export type SanityHashtagCollectionType = {
     slug: Slug,
     _id?:string
 }
+
+export type SanityCsvToProcess = {
+    objectType?: string;
+    description?: string;
+    createdDocuments?: string[];
+    csvFile?: any;
+};

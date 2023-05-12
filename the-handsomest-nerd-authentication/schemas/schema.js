@@ -22,33 +22,41 @@ import Position from "./position";
 import HashTag from "./hashtag/hashTag";
 import HashTagRelations from "./hashtag/hashTagRelations";
 import HashTagCollection from "./hashtag/hashTagCollection";
+import csvToProcess from "./csv/csvToProcess";
+import csvToProcessFile from "./csv/csvToProcessFile";
+import spreadsheetMember from "./spreadsheetMember";
+import spreadsheetMemberRelation from "./spreadsheetMemberRelation";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
-  // We name our schema
-  name: 'default',
-  // Then proceed to concatenate our document type
-  // to the ones provided by any plugins that are installed
-  types: schemaTypes.concat([
-    /* Your types here! */
-      user,
-      ExtendedProfile,
-      Like,
-      Category,
-      Comment,
-      Follow,
-      TimelineEvent,
-      Block,
-      Post,
-      PhotoAlbum,
-      AlbumImage,
-      BugReport,
-      firebaseTwitterProvider,
-      CommentThread,
-      PostComment,
-      Position,
-      HashTag,
-      HashTagRelations,
-      HashTagCollection
-  ]),
+    // We name our schema
+    name: 'default',
+    // Then proceed to concatenate our document type
+    // to the ones provided by any plugins that are installed
+    types: schemaTypes.concat([
+        /* Your types here! */
+        user,
+        ExtendedProfile,
+        Like,
+        Category,
+        Comment,
+        Follow,
+        TimelineEvent,
+        Block,
+        Post,
+        PhotoAlbum,
+        AlbumImage,
+        BugReport,
+        firebaseTwitterProvider,
+        CommentThread,
+        PostComment,
+        Position,
+        HashTag,
+        HashTagRelations,
+        HashTagCollection,
+        csvToProcess,
+        csvToProcessFile,
+        spreadsheetMember,
+        spreadsheetMemberRelation
+    ]),
 })
